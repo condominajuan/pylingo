@@ -1,0 +1,2762 @@
+<!DOCTYPE html>
+<html lang="es" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PyLingo: Módulo 2</title>
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error("Error: " + message + " en linea " + lineno);
+        };
+    </script>
+    <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --background: #f8fafc;
+            --foreground: #0f172a;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --muted-foreground: #64748b;
+            --primary: #3b82f6;
+            --primary-foreground: #ffffff;
+        }
+        body {
+            background-color: var(--background);
+            color: var(--foreground);
+        }
+        .blank-input {
+            width: 100px;
+            border-bottom: 2px solid var(--primary);
+            background: transparent;
+            text-align: center;
+            outline: none;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        #sidebar { transition: transform 0.3s ease-in-out; }
+        .fade-out { animation: fadeOut 1s ease-in-out forwards; }
+        @keyframes fadeOut {
+            0% { opacity: 1; visibility: visible; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        #transition-screen {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+        }
+        .code-example {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, opacity 0.4s ease-out;
+        }
+        .code-example.open {
+            max-height: 800px; 
+            opacity: 1;
+        }
+        .theory-expansion {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, opacity 0.4s ease-out;
+        }
+        .theory-expansion.open {
+            max-height: 1000px;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased h-screen flex flex-col md:flex-row overflow-hidden relative">
+
+    <div id="transition-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center hidden opacity-100">
+        <i class="fa-brands fa-python text-7xl mb-6 drop-shadow-lg"></i>
+        <h1 id="transition-module" class="text-3xl md:text-5xl font-bold mb-4 text-center px-4 drop-shadow-md"></h1>
+        <h2 id="transition-level" class="text-xl md:text-3xl font-medium text-blue-100 drop-shadow-md"></h2>
+    </div>
+
+    <!-- COMPACT MOBILE HEADER -->
+    <header class="md:hidden flex items-center justify-between p-2 bg-[var(--card)] border-b border-[var(--border)] z-20 shadow-sm">
+        <div class="flex items-center gap-2">
+            <button onclick="toggleSidebar()" class="text-[var(--foreground)] text-lg p-2 focus:outline-none">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <h1 class="text-base font-bold text-blue-500 flex items-center gap-1">
+                <i class="fa-brands fa-python"></i> PyLingo
+            </h1>
+        </div>
+        <div class="font-bold text-amber-500 flex items-center gap-1 text-sm mr-2">
+            <i class="fa-solid fa-star"></i> <span id="xp-counter-mobile">0</span>
+        </div>
+    </header>
+
+    <aside id="sidebar" class="fixed md:static inset-y-0 left-0 w-80 md:w-72 bg-[var(--card)] border-r border-[var(--border)] flex flex-col h-full shadow-2xl md:shadow-lg z-30 transform -translate-x-full md:translate-x-0">
+        <div class="p-4 flex justify-between items-center md:hidden border-b border-[var(--border)]">
+            <span class="font-bold text-lg text-[var(--foreground)]">Menú de Lecciones</span>
+            <button onclick="toggleSidebar()" class="text-2xl text-[var(--muted-foreground)] p-2">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="p-4 border-b border-[var(--border)] hidden md:block">
+            <h1 class="text-xl font-bold text-blue-500 flex items-center gap-2">
+                <i class="fa-brands fa-python"></i> PyLingo
+            </h1>
+            <p class="text-[var(--muted-foreground)] text-xs mt-1">Módulo 2: Fundamentos</p>
+        </div>
+        <div class="p-3 border-b border-[var(--border)] hidden md:flex justify-between items-center bg-blue-50/10">
+            <span class="font-semibold text-sm">Experiencia:</span>
+            <span id="xp-counter-desktop" class="text-amber-500 font-bold flex items-center gap-1 text-sm">
+                <i class="fa-solid fa-star"></i> 0 XP
+            </span>
+        </div>
+        <nav class="flex-1 overflow-y-auto p-3 space-y-1" id="lesson-nav"></nav>
+    </aside>
+
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden transition-opacity"></div>
+
+    <main class="flex-1 flex flex-col h-full relative bg-[var(--background)] overflow-hidden w-full">
+        
+        <header class="p-2 md:p-4 border-b border-[var(--border)] bg-[var(--card)] shadow-sm flex items-center justify-between">
+            <h2 id="current-lesson-title" class="text-sm md:text-lg font-bold text-[var(--foreground)] truncate">Selecciona una lección</h2>
+            <button onclick="goHome()" id="btn-home" class="hidden text-blue-500 font-bold bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-lg text-xs md:text-sm">
+                Menú
+            </button>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-3 md:p-6 relative flex flex-col" id="main-content">
+            
+            <div id="welcome-screen" class="max-w-2xl mx-auto text-center mt-10 px-4">
+                <i class="fa-brands fa-python text-5xl text-blue-500 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-3">¡Bienvenido a PyLingo V5!</h2>
+                <p class="text-sm text-[var(--muted-foreground)] mb-6">108 Ejercicios con ejemplos reales de código. ¡Comencemos!</p>
+                
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                    <button onclick="startLesson(-1)" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform transform hover:scale-105">
+                        <i class="fa-solid fa-seedling mr-2"></i> Empezar desde cero (Módulo 0)
+                    </button>
+                    <button onclick="startLesson(1)" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform transform hover:scale-105">
+                        <i class="fa-solid fa-forward mr-2"></i> Ya sé lo básico (Módulo 1)
+                    </button>
+                </div>
+
+            </div>
+
+            <div id="lesson-screen" class="max-w-3xl mx-auto w-full hidden flex-1 flex flex-col pb-10">
+                <!-- THEORY BOX -->
+                <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mb-4 shadow-sm">
+                    <h3 class="text-sm font-bold mb-2 flex items-center gap-1"><i class="fa-solid fa-book-open text-blue-500"></i> Teoría</h3>
+                    <div id="lesson-theory" class="text-xs md:text-sm text-[var(--foreground)] leading-relaxed mb-2"></div>
+                    
+                    <button id="btn-expand-theory" onclick="toggleTheory()" class="hidden text-xs text-blue-600 font-bold flex items-center gap-1 hover:underline mb-2">
+                        <i id="theory-icon" class="fa-solid fa-chevron-down"></i> Ver explicación detallada y ejemplos
+                    </button>
+                    <div id="theory-expanded-content" class="theory-expansion mt-2 bg-blue-50 p-3 rounded-lg text-xs md:text-sm text-[var(--foreground)] border border-blue-100 leading-relaxed"></div>
+                </div>
+
+                <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 shadow-sm relative flex-1 flex flex-col">
+                    <div class="flex justify-between items-center mb-3 border-b border-[var(--border)] pb-2">
+                        <div class="flex items-center gap-2 md:gap-4">
+                            <h3 class="text-sm md:text-base font-bold flex items-center gap-1 md:gap-2">
+                                <i class="fa-solid fa-dumbbell text-purple-500"></i> Ejercicio <span id="exercise-number">1</span>
+                            </h3>
+                            <div class="flex items-center bg-gray-100 rounded-lg p-0.5 shadow-inner">
+                                <button onclick="prevExercise()" class="text-gray-500 hover:text-blue-600 hover:bg-white rounded px-2 py-0.5 transition-colors"><i class="fa-solid fa-chevron-left"></i></button>
+                                <button onclick="nextExercise()" class="text-gray-500 hover:text-blue-600 hover:bg-white rounded px-2 py-0.5 transition-colors"><i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <div class="text-xs font-semibold px-2 py-1 bg-blue-100 rounded-full text-blue-800 whitespace-nowrap flex-shrink-0">
+                            <span id="progress-text">1 / 9</span>
+                        </div>
+                    </div>
+                    
+                    <div id="exercise-context" class="text-xs md:text-sm mb-3 text-[var(--muted-foreground)] border-l-2 border-blue-500 pl-2 bg-blue-50 py-1"></div>
+                    <div id="exercise-question" class="text-sm md:text-base mb-4 font-medium leading-relaxed"></div>
+                    
+                    <div id="exercise-container" class="mb-4"></div>
+
+                    <!-- HINTS & SKIP -->
+                    <div id="hint-container" class="hidden mb-4 bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2">
+                            <h4 class="font-bold text-yellow-800 text-xs flex items-center gap-1"><i class="fa-solid fa-lightbulb"></i> Pistas</h4>
+                            <div class="flex gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                                <button id="btn-skip" onclick="skipExercise()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded font-bold transition-colors">
+                                    <i class="fa-solid fa-eye"></i> Ver Respuesta
+                                </button>
+                                <div class="flex flex-col items-center">
+                                    <span class="text-[10px] text-yellow-700 font-bold mb-0.5" id="hint-counter">0/0</span>
+                                    <button id="btn-next-hint" onclick="showNextHint()" class="text-xs bg-yellow-200 hover:bg-yellow-300 text-yellow-800 px-3 py-1.5 rounded font-bold transition-colors">
+                                        Siguiente Pista
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <ul id="hint-list" class="list-disc pl-4 text-xs text-yellow-700 space-y-1"></ul>
+                    </div>
+
+                    <div class="flex-1"></div>
+
+                    <!-- FEEDBACK BOX -->
+                    <div id="feedback-box" class="hidden mb-4 p-4 rounded-xl font-medium flex items-start gap-3">
+                        <i id="feedback-icon" class="mt-0.5 text-xl"></i>
+                        <div class="w-full">
+                            <div id="feedback-title" class="font-bold text-sm md:text-base mb-1"></div>
+                            <div id="feedback-text" class="text-xs md:text-sm leading-relaxed"></div>
+                        </div>
+                    </div>
+
+                    <!-- EXAMPLE ACCORDION -->
+                    <div id="example-container" class="hidden mb-4">
+                        <button onclick="toggleExample()" class="text-xs md:text-sm text-blue-600 font-bold flex items-center gap-1 hover:underline">
+                            <i id="example-icon" class="fa-solid fa-chevron-down"></i> Ver ejemplo de código aplicable
+                        </button>
+                        <div id="demo-example" class="code-example mt-2 bg-gray-900 rounded-lg p-3 md:p-4 text-green-400 font-mono text-xs md:text-sm border border-gray-700 leading-relaxed whitespace-pre-wrap"></div>
+                    </div>
+
+                    <!-- BUTTONS -->
+                    <div class="flex flex-col md:flex-row gap-2">
+                        <button id="btn-check" onclick="checkAnswer()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-sm transition-colors">
+                            Comprobar Respuesta
+                        </button>
+                        <button id="btn-continue" onclick="nextExercise()" class="hidden w-full bg-gray-900 text-white font-bold py-3 rounded-xl shadow-sm transition-colors">
+                            Siguiente Ejercicio <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="completion-screen" class="hidden max-w-2xl mx-auto text-center mt-10 px-4">
+                <i class="fa-solid fa-trophy text-6xl text-yellow-500 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-2">¡Nivel Completado!</h2>
+                <p class="text-sm text-[var(--muted-foreground)] mb-6">Ganaste XP.</p>
+                <div class="flex flex-col gap-3 max-w-sm mx-auto">
+                    <button id="btn-next-lesson" onclick="goToNextLesson()" class="w-full bg-blue-500 text-white font-bold py-3 rounded-full shadow-md text-sm">
+                        <span id="next-lesson-text">Continuar</span> <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                    <button onclick="goHome()" class="w-full bg-transparent text-[var(--muted-foreground)] font-bold py-2 rounded-full border border-[var(--border)] text-sm">
+                        Volver al Menú
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const lessons = [
+    {
+        "id": -1,
+        "moduleNum": 0,
+        "moduleName": "Módulo 0: Primeros Pasos",
+        "levelName": "Nivel 1: Hablando con Python",
+        "title": "1. Tu primer programa",
+        "theory": "En Python, usamos <code>print()</code> para hacer que la computadora nos hable.",
+        "theory_expanded": "Python es un lenguaje de programación. Imagina que es un traductor entre tú y la computadora. La forma más básica de interactuar es pedirle que muestre un texto en la pantalla. Para eso usamos el comando <code>print()</code>, que significa 'imprimir' en inglés. El texto que queremos que diga debe ir entre comillas dentro de los paréntesis.<hr class='my-4 border-gray-200'><h3>Machete (Resumen):</h3><pre class='bg-gray-800 text-green-400 p-2 rounded mt-2 text-xs'># Mostrar en pantalla:\nprint(\"Texto\")\n\n# Hacer un comentario:\n# Esto es un comentario</pre>",
+        "exercises": [
+            {
+                "type": "multiple_choice",
+                "context": "¡Bienvenido a Python! Este es tu primer paso guiado.",
+                "question": "Selecciona la opción que dice 'Continuar' para avanzar.",
+                "options": [
+                    "Continuar",
+                    "Atrás",
+                    "Salir"
+                ],
+                "correct": 0,
+                "exact_answer": "Continuar",
+                "explanation": "¡Excelente! Has dado tu primer paso.",
+                "example": "<code>print(\"Continuar\")</code><br><span class='text-gray-500'># Muestra el texto</span>",
+                "hints": [
+                    "Haz clic en Continuar.",
+                    "Es la primera opción.",
+                    "Dale sin miedo."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Vamos a hacer que la computadora diga Hola.",
+                "question": "Completa con la palabra print: <code>{0}(\"Hola\")</code>",
+                "code": "<code>{0}(\"Hola\")</code>",
+                "answers": [
+                    [
+                        "print"
+                    ]
+                ],
+                "exact_answer": "print(\"Hola\")",
+                "explanation": "El comando print siempre se escribe en minúsculas.",
+                "example": "<code>print(\"Hola\")</code>",
+                "hints": [
+                    "Escribe print en el recuadro.",
+                    "Son 5 letras.",
+                    "p-r-i-n-t"
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "¡Es tu turno de escribirlo completo!",
+                "question": "Escribe el comando para imprimir \"Hola Mundo\".",
+                "exact_answer": "print(\"Hola Mundo\")",
+                "explanation": "Siempre recuerda abrir y cerrar los paréntesis, y poner el texto entre comillas.",
+                "example": "<code>print(\"Python\")</code>",
+                "hints": [
+                    "Escribe: <code>print(\"Hola Mundo\")</code>",
+                    "Recuerda las comillas.",
+                    "Recuerda los paréntesis."
+                ]
+            }
+        ]
+    },
+    {
+        "id": 0,
+        "moduleNum": 0,
+        "moduleName": "Módulo 0: Primeros Pasos",
+        "levelName": "Nivel 2: Comentarios",
+        "title": "2. Dejando notas",
+        "theory": "Los comentarios son notas para humanos que la computadora ignora.",
+        "theory_expanded": "A veces queremos dejar una explicación en nuestro código para acordarnos de qué hace. Usamos el símbolo de numeral <code>#</code> (hashtag). Todo lo que escribas después de ese símbolo en esa línea será invisible para Python. Además, Python siempre lee las líneas de arriba hacia abajo, una por una.<hr class='my-4 border-gray-200'><h3>Machete (Resumen):</h3><pre class='bg-gray-800 text-green-400 p-2 rounded mt-2 text-xs'># Mostrar en pantalla:\nprint(\"Texto\")\n\n# Hacer un comentario:\n# Esto es un comentario</pre>",
+        "exercises": [
+            {
+                "type": "multiple_choice",
+                "context": "Quieres dejar una nota en tu código.",
+                "question": "¿Qué símbolo inicia un comentario en Python?",
+                "options": [
+                    "//",
+                    "/*",
+                    "#"
+                ],
+                "correct": 2,
+                "exact_answer": "#",
+                "explanation": "En Python, se usa el símbolo <code>#</code> para los comentarios de una línea.",
+                "example": "<code># Esto es una nota</code>",
+                "hints": [
+                    "Es el símbolo de numeral o hashtag.",
+                    "Se usa mucho en redes sociales.",
+                    "Es el tercero."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Comentemos un código para que no se ejecute.",
+                "question": "Agrega el símbolo de comentario antes del print: <code>{0}print(\"Secreto\")</code>",
+                "code": "<code>{0}print(\"Secreto\")</code>",
+                "answers": [
+                    [
+                        "#"
+                    ]
+                ],
+                "exact_answer": "#print(\"Secreto\")",
+                "explanation": "Al poner el `#` al principio, toda la línea se convierte en texto ignorado.",
+                "example": "<code># Código oculto</code>",
+                "hints": [
+                    "Usa el hashtag <code>#</code>.",
+                    "Es un solo caracter.",
+                    "Está en el número 3 de tu teclado a veces."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Escribe tu primer comentario.",
+                "question": "Escribe exactamente: <code># Hola</code>",
+                "exact_answer": "# Hola",
+                "explanation": "Los comentarios son fundamentales para mantener el código legible.",
+                "example": "<code># Saludo</code>",
+                "hints": [
+                    "Escribe <code># Hola</code>.",
+                    "Respeta el espacio.",
+                    "Usa el símbolo y la palabra."
+                ]
+            }
+        ]
+    },
+    {
+        "id": 1,
+        "moduleNum": 1,
+        "moduleName": "Módulo 1: Variables y Tipos",
+        "levelName": "Nivel 1: Básico",
+        "title": "1. Introducción a Variables",
+        "theory": "En Python, una variable es como una etiqueta que le ponemos a un dato para recordarlo.",
+        "theory_expanded": "Imagina que las variables son como cajas con etiquetas. Si tienes el precio de un producto, en lugar de memorizar el número, lo guardas en una caja y le pones la etiqueta <code>precio</code>. Cuando necesites ese valor, simplemente llamas a la caja por su nombre. ¡Así de fácil es guardar información en programación!<hr class='my-4 border-gray-200'><h3>Machete (Resumen):</h3><pre class='bg-gray-800 text-green-400 p-2 rounded mt-2 text-xs'># Asignar variables:\nnombre = \"Ana\"\nedad = 25\nactivo = True\n\n# Actualizar/Suma corta:\npuntos += 5\n\n# Intercambiar:\na, b = b, a</pre>",
+        "exercises": [
+            {
+                "type": "multiple_choice",
+                "context": "En un sistema de ventas, necesitas guardar el nombre de un cliente.",
+                "question": "¿Cuál es la forma correcta de asignar el nombre Ana a una variable?",
+                "options": [
+                    "nombre_cliente = \"Ana\"",
+                    "\"Ana\" = nombre_cliente",
+                    "nombre_cliente == \"Ana\""
+                ],
+                "correct": 0,
+                "exact_answer": "nombre_cliente = \"Ana\"",
+                "explanation": "El nombre de la variable (<code>nombre_cliente</code>) siempre va a la izquierda. Luego usamos un solo signo de igual <code>=</code> para asignar, y a la derecha el valor de texto entre comillas <code>\"Ana\"</code>.",
+                "example": "<code>cliente = \"Juan\"</code><br><span class='text-gray-500'># Resultado: Juan</span>",
+                "hints": [
+                    "La variable siempre va a la izquierda del signo igual.",
+                    "Para asignar un valor se usa un solo signo <code>=</code>.",
+                    "El texto debe ir entre comillas."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Estás registrando el stock de zapatillas en una tienda.",
+                "question": "¿Cómo guardas el número 50 en la variable <code>stock_zapatillas</code>?",
+                "options": [
+                    "stock_zapatillas = \"50\"",
+                    "stock_zapatillas = 50",
+                    "50 = stock_zapatillas"
+                ],
+                "correct": 1,
+                "exact_answer": "stock_zapatillas = 50",
+                "explanation": "Para números enteros no usamos comillas. Si usáramos comillas, Python lo trataría como texto (palabras) y no podríamos hacer operaciones matemáticas con él.",
+                "example": "<code>cantidad = 10</code><br><span class='text-gray-500'># Resultado: 10</span>",
+                "hints": [
+                    "Los números con los que haremos cálculos no llevan comillas.",
+                    "La variable va a la izquierda.",
+                    "Revisa bien si las comillas son necesarias."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Tu tienda tiene un estado que indica si está abierta o cerrada.",
+                "question": "¿Cómo asignas el valor lógico Verdadero a la variable <code>tienda_abierta</code>?",
+                "options": [
+                    "tienda_abierta = verdadero",
+                    "tienda_abierta = \"True\"",
+                    "tienda_abierta = True"
+                ],
+                "correct": 2,
+                "exact_answer": "tienda_abierta = True",
+                "explanation": "En Python, los valores booleanos (verdadero/falso) se escriben en inglés y con la primera letra en mayúscula: <code>True</code> o <code>False</code>. No llevan comillas.",
+                "example": "<code>activo = True</code><br><span class='text-gray-500'># Resultado: True</span>",
+                "hints": [
+                    "En Python se usa el inglés para verdadero.",
+                    "Debe empezar con mayúscula.",
+                    "No es un texto, por lo que no lleva comillas."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Vamos a registrar el precio de un nuevo monitor.",
+                "question": "Completa el código para asignar 299.99 a <code>precio_monitor</code>.",
+                "code": "<code>precio_monitor {0} {1}</code>",
+                "answers": [
+                    [
+                        "="
+                    ],
+                    [
+                        "299.99"
+                    ]
+                ],
+                "exact_answer": "precio_monitor = 299.99",
+                "explanation": "Necesitamos el operador de asignación <code>=</code> en el primer espacio, y el valor numérico <code>299.99</code> (con punto decimal, sin comillas) en el segundo.",
+                "example": "<code>precio_teclado = 45.50</code><br><span class='text-gray-500'># Resultado: 45.5</span>",
+                "hints": [
+                    "Usa el signo igual para asignar.",
+                    "Usa punto para los decimales.",
+                    "No uses comillas."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "El sistema necesita identificar si un producto tiene descuento.",
+                "question": "Completa el código para indicar que <code>tiene_descuento</code> es Falso.",
+                "code": "<code>tiene_descuento = {0}</code>",
+                "answers": [
+                    [
+                        "False",
+                        "false"
+                    ]
+                ],
+                "exact_answer": "tiene_descuento = False",
+                "explanation": "El valor correcto es <code>False</code>. Recuerda que es una palabra reservada en Python, representa un estado lógico y debe escribirse con F mayúscula.",
+                "example": "<code>en_oferta = False</code><br><span class='text-gray-500'># Resultado: False</span>",
+                "hints": [
+                    "Falso en inglés es False.",
+                    "Debe iniciar con mayúscula.",
+                    "No requiere comillas."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Vamos a guardar el correo electrónico de un cliente.",
+                "question": "Completa el código asignando el texto ana@mail.com.",
+                "code": "<code>correo_cliente = {0}ana@mail.com{1}</code>",
+                "answers": [
+                    [
+                        "\"",
+                        "'"
+                    ],
+                    [
+                        "\"",
+                        "'"
+                    ]
+                ],
+                "exact_answer": "correo_cliente = \"ana@mail.com\"",
+                "explanation": "El correo es un texto (cadena de caracteres o string). En Python, todos los textos deben estar encerrados entre comillas dobles <code>\"</code> o comillas simples <code>'</code>.",
+                "example": "<code>email = \"juan@mail.com\"</code><br><span class='text-gray-500'># Resultado: juan@mail.com</span>",
+                "hints": [
+                    "Es texto, necesita ir entre signos de puntuación específicos.",
+                    "Empieza con comillas.",
+                    "Termina con la misma comilla."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Ahora escribirás todo por tu cuenta. Necesitamos guardar la cantidad de productos vendidos hoy.",
+                "question": "Crea una variable <code>ventas_hoy</code> y asígnale el número entero 150.",
+                "exact_answer": "ventas_hoy = 150",
+                "explanation": "Debes escribir el nombre de la variable exactamente como se pide (<code>ventas_hoy</code>), luego el signo de igual <code>=</code> y finalmente el número <code>150</code> sin comillas.",
+                "example": "<code>ventas_ayer = 120</code><br><span class='text-gray-500'># Resultado: 120</span>",
+                "hints": [
+                    "Variable a la izquierda: <code>ventas_hoy</code>.",
+                    "Signo igual en el medio.",
+                    "El número 150 a la derecha."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Queremos registrar el código del cupón que ingresó el usuario.",
+                "question": "Crea la variable <code>codigo_cupon</code> y asígnale el texto \"VERANO20\".",
+                "exact_answer": "codigo_cupon = \"VERANO20\"",
+                "explanation": "Escribes <code>codigo_cupon</code>, luego <code>=</code> y el texto <code>\"VERANO20\"</code> asegurándote de usar comillas porque es una cadena de texto.",
+                "example": "<code>codigo_secreto = \"INVIERNO\"</code><br><span class='text-gray-500'># Resultado: INVIERNO</span>",
+                "hints": [
+                    "Nombre de variable: <code>codigo_cupon</code>.",
+                    "Asigna con <code>=</code>.",
+                    "El texto VERANO20 va entre comillas."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "El sistema está realizando un proceso interno. Debemos indicar que el sistema está cargando.",
+                "question": "Crea la variable <code>cargando</code> y asígnale el valor lógico Verdadero.",
+                "exact_answer": "cargando = True",
+                "explanation": "Asignamos <code>cargando = True</code>. <code>True</code> debe tener la 'T' mayúscula y no lleva comillas al ser un booleano.",
+                "example": "<code>procesando = True</code><br><span class='text-gray-500'># Resultado: True</span>",
+                "hints": [
+                    "Variable: <code>cargando</code>.",
+                    "Usa <code>=</code>.",
+                    "Verdadero es <code>True</code>."
+                ]
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "moduleNum": 1,
+        "moduleName": "Módulo 1: Variables y Tipos",
+        "levelName": "Nivel 2: Intercambios y Actualizaciones",
+        "title": "2. Actualización de Variables",
+        "theory": "Las variables pueden cambiar su valor. Podemos sobreescribirlas o intercambiarlas.",
+        "theory_expanded": "Una de las grandes ventajas de las variables es que su valor puede 'variar' (por eso se llaman así). Si tenías 10 monedas y encuentras 5, puedes decirle a Python que actualice el valor de la caja de monedas. Incluso podemos hacer trucos increíbles, como intercambiar el contenido de dos cajas en una sola línea sin perder nada de información.<hr class='my-4 border-gray-200'><h3>Machete (Resumen):</h3><pre class='bg-gray-800 text-green-400 p-2 rounded mt-2 text-xs'># Asignar variables:\nnombre = \"Ana\"\nedad = 25\nactivo = True\n\n# Actualizar/Suma corta:\npuntos += 5\n\n# Intercambiar:\na, b = b, a</pre>",
+        "exercises": [
+            {
+                "type": "multiple_choice",
+                "context": "Un cliente tenía un saldo de 100, y ahora queremos que sea 50.",
+                "question": "¿Qué sucede si escribimos <code>saldo = 100</code> y en la siguiente línea <code>saldo = 50</code>?",
+                "options": [
+                    "Da un error porque ya tenía un valor.",
+                    "La variable saldo valdrá 50, olvidando el 100.",
+                    "La variable saldo valdrá 150."
+                ],
+                "correct": 1,
+                "exact_answer": "La variable saldo valdrá 50, olvidando el 100.",
+                "explanation": "En Python, cuando asignas un nuevo valor a una variable que ya existía, el valor anterior se borra y es reemplazado por el nuevo.",
+                "example": "<code>x = 5<br>x = 2</code><br><span class='text-gray-500'># Resultado final de x: 2</span>",
+                "hints": [
+                    "Piensa en la variable como una caja que solo puede tener un objeto.",
+                    "Si metes algo nuevo, debes sacar lo anterior.",
+                    "Se reemplaza."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Queremos acortar la forma en que sumamos puntos a un jugador.",
+                "question": "¿Qué operador se usa para sumar 5 a la variable <code>puntos</code> directamente?",
+                "options": [
+                    "puntos =+ 5",
+                    "puntos ++ 5",
+                    "puntos += 5"
+                ],
+                "correct": 2,
+                "exact_answer": "puntos += 5",
+                "explanation": "El operador <code>+=</code> suma el valor de la derecha a la variable de la izquierda y guarda el resultado. <code>puntos += 5</code> es exactamente lo mismo que <code>puntos = puntos + 5</code>.",
+                "example": "<code>vidas += 1</code><br><span class='text-gray-500'># Resultado: suma 1 vida</span>",
+                "hints": [
+                    "El más va antes del igual.",
+                    "Significa: sumar y luego asignar.",
+                    "Es <code>+=</code>."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Por un error del sistema, la tarjeta del Cliente A se asignó a <code>tarjeta_b</code> y viceversa.",
+                "question": "¿Cuál es la forma correcta en Python de intercambiar ambos valores sin usar una tercera variable?",
+                "options": [
+                    "tarjeta_a = tarjeta_b",
+                    "tarjeta_a, tarjeta_b = tarjeta_b, tarjeta_a",
+                    "tarjeta_a <-> tarjeta_b"
+                ],
+                "correct": 1,
+                "exact_answer": "tarjeta_a, tarjeta_b = tarjeta_b, tarjeta_a",
+                "explanation": "Python permite la asignación múltiple. Al poner <code>a, b = b, a</code>, Python toma los valores actuales a la derecha y los asigna simultáneamente a las variables de la izquierda.",
+                "example": "<code>x, y = y, x</code><br><span class='text-gray-500'># Intercambio exitoso</span>",
+                "hints": [
+                    "Se hace todo en la misma línea separando con comas.",
+                    "Se llama asignación simultánea.",
+                    "El orden a la izquierda se invierte a la derecha."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Vamos a restar 10 al inventario usando el operador acortado.",
+                "question": "Completa el código para restar 10 a <code>inventario</code>.",
+                "code": "<code>inventario {0} 10</code>",
+                "answers": [
+                    [
+                        "-="
+                    ]
+                ],
+                "exact_answer": "inventario -= 10",
+                "explanation": "Para restar y asignar en el mismo paso, usamos el operador <code>-=</code>. Es una forma elegante de actualizar valores.",
+                "example": "<code>balas -= 5</code><br><span class='text-gray-500'># Resta 5 balas</span>",
+                "hints": [
+                    "Es similar a la suma acortada pero con el signo de resta.",
+                    "El menos va antes que el igual.",
+                    "Usa <code>-=</code>."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Tienes dos variables: <code>alto</code> y <code>ancho</code>. Vamos a intercambiarlas.",
+                "question": "Completa el intercambio: <code>alto, ancho = {0}, {1}</code>",
+                "code": "<code>alto, ancho = {0}, {1}</code>",
+                "answers": [
+                    [
+                        "ancho"
+                    ],
+                    [
+                        "alto"
+                    ]
+                ],
+                "exact_answer": "alto, ancho = ancho, alto",
+                "explanation": "Para intercambiarlas, el orden del lado derecho del igual debe ser el inverso al del lado izquierdo.",
+                "example": "<code>dia, mes = mes, dia</code><br><span class='text-gray-500'># Se invierten</span>",
+                "hints": [
+                    "En el primer hueco va la segunda variable.",
+                    "En el segundo hueco va la primera variable.",
+                    "Es cruzado."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Queremos duplicar el salario de un empleado.",
+                "question": "Completa para multiplicar <code>salario</code> por 2 usando el operador acortado.",
+                "code": "<code>salario {0} 2</code>",
+                "answers": [
+                    [
+                        "*="
+                    ]
+                ],
+                "exact_answer": "salario *= 2",
+                "explanation": "El operador <code>*=</code> multiplica el valor de la variable por el número de la derecha y actualiza la variable. (Equivale a <code>salario = salario * 2</code>).",
+                "example": "<code>velocidad *= 3</code><br><span class='text-gray-500'># Triplica la velocidad</span>",
+                "hints": [
+                    "Usa el asterisco para multiplicar.",
+                    "Va seguido del signo igual.",
+                    "Es <code>*=</code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "La variable <code>experiencia</code> guarda tus puntos actuales. Has ganado 500 puntos.",
+                "question": "Escribe la línea para sumar 500 a <code>experiencia</code> usando el operador de asignación compuesta (+=).",
+                "exact_answer": "experiencia += 500",
+                "explanation": "Al usar <code>experiencia += 500</code> le sumamos 500 puntos al valor que la variable ya tuviera antes.",
+                "example": "<code>monedas += 10</code><br><span class='text-gray-500'># Añade 10 a monedas</span>",
+                "hints": [
+                    "Empieza con la variable <code>experiencia</code>.",
+                    "Usa el operador <code>+=</code>.",
+                    "El número es 500."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Las variables <code>turno_jugador</code> y <code>turno_enemigo</code> determinan de quién es el turno. Al finalizar la ronda, deben invertirse.",
+                "question": "Escribe la línea de código que intercambia las variables <code>turno_jugador</code> y <code>turno_enemigo</code> simultáneamente.",
+                "exact_answer": "turno_jugador, turno_enemigo = turno_enemigo, turno_jugador",
+                "explanation": "Escribimos <code>turno_jugador, turno_enemigo</code> a la izquierda, luego <code>=</code>, y a la derecha las ponemos en el orden inverso: <code>turno_enemigo, turno_jugador</code>.",
+                "example": "<code>a, b = b, a</code><br><span class='text-gray-500'># Intercambio</span>",
+                "hints": [
+                    "A la izquierda: <code>turno_jugador, turno_enemigo</code>.",
+                    "Signo igual en el medio.",
+                    "A la derecha invierte el orden."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "El héroe bebió una poción maldita y su <code>salud</code> se redujo a la mitad.",
+                "question": "Escribe la línea para dividir la variable <code>salud</code> por 2 usando el operador acortado (/=).",
+                "exact_answer": "salud /= 2",
+                "explanation": "Usamos <code>salud /= 2</code> para que Python tome la salud actual, la divida por 2, y guarde el nuevo resultado en la misma caja de salud.",
+                "example": "<code>energia /= 4</code><br><span class='text-gray-500'># Divide energía en 4</span>",
+                "hints": [
+                    "Inicia con <code>salud</code>.",
+                    "El operador es <code>/=</code>.",
+                    "El número es 2."
+                ]
+            }
+        ]
+    },
+    {
+        "id": 3,
+        "moduleNum": 2,
+        "moduleName": "Módulo 2: Operaciones y Textos",
+        "levelName": "Nivel 1: Matemáticas",
+        "title": "1. Operadores Matemáticos",
+        "theory": "En Python, podemos usar la computadora como una calculadora usando operadores como +, -, * y /.",
+        "theory_expanded": "Las variables no sirven de mucho si no podemos interactuar con ellas. Los operadores matemáticos te permiten sumar el precio de dos productos, restar un descuento, o multiplicar una cantidad. Es como armar fórmulas de Excel pero dentro del código. Usamos <code>+</code> para sumar, <code>-</code> para restar, <code>*</code> (asterisco) para multiplicar y <code>/</code> (barra) para dividir.<hr class='my-4 border-gray-200'><h3>Machete (Resumen):</h3><pre class='bg-gray-800 text-green-400 p-2 rounded mt-2 text-xs'># Matemáticas:\nsuma = a + b\nresta = a - b\nmult = a * b\ndiv = a / b\n\n# Conversión:\nnum = int(\"10\")\ntexto = str(10)</pre>",
+        "exercises": [
+            {
+                "type": "multiple_choice",
+                "context": "Estás calculando el total a pagar en un e-commerce.",
+                "question": "Si tienes <code>precio = 100</code> y <code>envio = 15</code>, ¿cómo calculas el total?",
+                "options": [
+                    "total = precio + envio",
+                    "total = precio y envio",
+                    "total = 100 * 15"
+                ],
+                "correct": 0,
+                "exact_answer": "total = precio + envio",
+                "explanation": "Para sumar los valores guardados en dos variables, usamos el operador <code>+</code> entre ellas.",
+                "example": "<code>t = a + b</code><br><span class='text-gray-500'># Suma variables a y b</span>",
+                "hints": [
+                    "Queremos sumar el contenido de las variables.",
+                    "El operador de suma es el signo más <code>+</code>.",
+                    "Asignamos la suma a la variable <code>total</code>."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Quieres aplicar un descuento restando un valor.",
+                "question": "¿Cuál es el operador matemático para restar en Python?",
+                "options": [
+                    "restar()",
+                    "-",
+                    "/"
+                ],
+                "correct": 1,
+                "exact_answer": "-",
+                "explanation": "La resta se realiza directamente con el guion medio <code>-</code>, igual que en la matemática tradicional.",
+                "example": "<code>rebaja = precio - 20</code><br><span class='text-gray-500'># Resta 20 al precio</span>",
+                "hints": [
+                    "Es el mismo símbolo que usas en papel.",
+                    "Es una línea horizontal corta.",
+                    "Se llama guion medio o menos."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Tienes 5 cajas de zapatillas, y en cada caja hay 12 pares.",
+                "question": "¿Cómo multiplicas 5 por 12 en código?",
+                "options": [
+                    "5 x 12",
+                    "5 * 12",
+                    "5 . 12"
+                ],
+                "correct": 1,
+                "exact_answer": "5 * 12",
+                "explanation": "En informática, la multiplicación no usa la letra 'x', porque se confundiría con una variable. Siempre usamos el asterisco <code>*</code>.",
+                "example": "<code>total = 5 * 12</code><br><span class='text-gray-500'># Resultado: 60</span>",
+                "hints": [
+                    "No uses la letra X.",
+                    "Es el símbolo de estrella pequeña.",
+                    "Se llama asterisco."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Necesitamos repartir 100 dólares entre 4 personas.",
+                "question": "Completa el código para realizar la división: <code>reparto = 100 {0} 4</code>",
+                "code": "<code>reparto = 100 {0} 4</code>",
+                "answers": [
+                    [
+                        "/"
+                    ]
+                ],
+                "exact_answer": "reparto = 100 / 4",
+                "explanation": "La división en Python se realiza utilizando la barra diagonal <code>/</code> (slash).",
+                "example": "<code>mitad = 50 / 2</code><br><span class='text-gray-500'># Resultado: 25.0</span>",
+                "hints": [
+                    "Es la barra inclinada hacia adelante.",
+                    "Se llama slash.",
+                    "Se usa en fracciones matemáticas."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Queremos encontrar el volumen total de una botella y un vaso.",
+                "question": "Suma las variables <code>botella</code> y <code>vaso</code>.",
+                "code": "<code>total_liquido = botella {0} vaso</code>",
+                "answers": [
+                    [
+                        "+"
+                    ]
+                ],
+                "exact_answer": "total_liquido = botella + vaso",
+                "explanation": "Simplemente usamos el símbolo <code>+</code> para sumar el valor contenido dentro de las dos variables.",
+                "example": "<code>suma = a + b</code><br><span class='text-gray-500'># Suma a y b</span>",
+                "hints": [
+                    "Es la suma tradicional.",
+                    "Usa el signo de la cruz.",
+                    "Es el operador <code>+</code>."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Tienes el precio sin impuestos en la variable <code>base</code>. El impuesto es el 21%.",
+                "question": "Multiplica la variable <code>base</code> por 1.21.",
+                "code": "<code>precio_final = base {0} 1.21</code>",
+                "answers": [
+                    [
+                        "*"
+                    ]
+                ],
+                "exact_answer": "precio_final = base * 1.21",
+                "explanation": "Usamos el asterisco <code>*</code> para multiplicar la variable por el número.",
+                "example": "<code>impuesto = venta * 1.15</code><br><span class='text-gray-500'># Agrega 15%</span>",
+                "hints": [
+                    "Recuerda que no usamos la letra x.",
+                    "Usamos el asterisco.",
+                    "Es el símbolo <code>*</code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Tienes tu ingreso mensual guardado en <code>sueldo</code> y tus gastos en <code>gastos</code>.",
+                "question": "Escribe el código para asignar a la variable <code>ahorro</code> la resta de <code>sueldo</code> menos <code>gastos</code>.",
+                "exact_answer": "ahorro = sueldo - gastos",
+                "explanation": "Iniciamos con <code>ahorro =</code> y luego escribimos la operación <code>sueldo - gastos</code>.",
+                "example": "<code>beneficio = ingresos - costos</code><br><span class='text-gray-500'># Resta básica</span>",
+                "hints": [
+                    "Variable <code>ahorro</code> a la izquierda.",
+                    "Usa el signo igual.",
+                    "Resta usando el guion <code>-</code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "En un videojuego, el daño infligido es el ataque del jugador por 2.",
+                "question": "Escribe el código para asignar a <code>danio_total</code> la multiplicación de la variable <code>ataque</code> por 2.",
+                "exact_answer": "danio_total = ataque * 2",
+                "explanation": "Escribes <code>danio_total = ataque * 2</code>. Utilizamos el asterisco para multiplicar.",
+                "example": "<code>fuerza = base * 3</code><br><span class='text-gray-500'># Triple daño</span>",
+                "hints": [
+                    "Variable a la izquierda: <code>danio_total</code>.",
+                    "Usa asterisco para multiplicar.",
+                    "Multiplica por 2."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Tienes una pizza entera dividida en partes iguales. La cantidad total está en la variable <code>porciones</code>, y hay 4 amigos.",
+                "question": "Asigna a <code>mi_parte</code> el resultado de dividir <code>porciones</code> entre 4.",
+                "exact_answer": "mi_parte = porciones / 4",
+                "explanation": "Escribes <code>mi_parte = porciones / 4</code>. La división simple usa la barra inclinada.",
+                "example": "<code>trozos = pastel / 5</code><br><span class='text-gray-500'># Divide en 5</span>",
+                "hints": [
+                    "Empieza con <code>mi_parte =</code>.",
+                    "Divide usando la variable <code>porciones</code>.",
+                    "Usa la barra <code>/</code> y el número 4."
+                ]
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "moduleNum": 2,
+        "moduleName": "Módulo 2: Operaciones y Textos",
+        "levelName": "Nivel 2: Textos y Conversiones",
+        "title": "2. Manipulación de Textos",
+        "theory": "En Python podemos 'sumar' textos para unirlos (concatenación) y convertir tipos de datos.",
+        "theory_expanded": "Imagina que tienes una etiqueta que dice '¡Hola, ' y otra que dice 'Ana!'. Si usas el signo de suma <code>+</code> con textos, Python los pega como si fuera cinta adhesiva, creando '¡Hola, Ana!'. A esto le llamamos 'concatenación'. Sin embargo, ¡cuidado! No puedes sumar texto con números matemáticamente. Para eso, primero debes transformar el texto en número (usando <code>int()</code>) o el número en texto (usando <code>str()</code>).<hr class='my-4 border-gray-200'><h3>Machete (Resumen):</h3><pre class='bg-gray-800 text-green-400 p-2 rounded mt-2 text-xs'># Matemáticas:\nsuma = a + b\nresta = a - b\nmult = a * b\ndiv = a / b\n\n# Conversión:\nnum = int(\"10\")\ntexto = str(10)</pre>",
+        "exercises": [
+            {
+                "type": "multiple_choice",
+                "context": "Quieres unir el nombre y apellido de un cliente.",
+                "question": "Si sumas dos textos: <code>\"Juan\" + \"Perez\"</code>, ¿cuál es el resultado?",
+                "options": [
+                    "Da un error.",
+                    "\"JuanPerez\"",
+                    "\"Juan Perez\" (con espacio)"
+                ],
+                "correct": 1,
+                "exact_answer": "\"JuanPerez\"",
+                "explanation": "El operador suma <code>+</code> pega los textos exactamente como están. Si no hay un espacio dentro de las comillas, no se agregará automáticamente.",
+                "example": "<code>\"A\" + \"B\"</code><br><span class='text-gray-500'># Resultado: \"AB\"</span>",
+                "hints": [
+                    "Python hace exactamente lo que le dices.",
+                    "Pega los textos tal cual.",
+                    "No agrega espacios de forma mágica."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Te ingresan la edad desde un formulario web, pero llega como texto: <code>\"25\"</code> (con comillas).",
+                "question": "¿Cómo conviertes ese texto en un número entero para sumarle 1?",
+                "options": [
+                    "numero(\"25\")",
+                    "int(\"25\")",
+                    "str(\"25\")"
+                ],
+                "correct": 1,
+                "exact_answer": "int(\"25\")",
+                "explanation": "Para convertir un texto que contiene un número a un valor entero matemático, usamos la función <code>int()</code> (que viene de 'integer', entero en inglés).",
+                "example": "<code>edad = int(\"30\")</code><br><span class='text-gray-500'># Resultado: 30 numérico</span>",
+                "hints": [
+                    "Queremos un 'entero'.",
+                    "En inglés es 'integer'.",
+                    "La función se abrevia a tres letras: <code>int()</code>."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Quieres mostrar un mensaje combinando texto con el número 10.",
+                "question": "Si intentas ejecutar <code>\"Tengo \" + 10</code>, ¿qué ocurre?",
+                "options": [
+                    "Muestra \"Tengo 10\"",
+                    "Muestra \"Tengo 10.0\"",
+                    "Da un error de tipo (TypeError)"
+                ],
+                "correct": 2,
+                "exact_answer": "Da un error de tipo (TypeError)",
+                "explanation": "Python es muy estricto: no te deja sumar manzanas con peras (Texto con Números). Para unirlos, primero debes convertir el número a texto.",
+                "example": "<code>\"Nivel \" + str(5)</code><br><span class='text-gray-500'># Resultado: \"Nivel 5\"</span>",
+                "hints": [
+                    "Python es de tipado fuerte.",
+                    "No mezcla texto y números libremente.",
+                    "El sistema se quejará con un error."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Vamos a unir dos palabras con un espacio en el medio.",
+                "question": "Completa el código: <code>saludo = \"Hola\" + {0} + \"Mundo\"</code>",
+                "code": "<code>saludo = \"Hola\" + {0} + \"Mundo\"</code>",
+                "answers": [
+                    [
+                        "\" \"",
+                        "' '"
+                    ]
+                ],
+                "exact_answer": "saludo = \"Hola\" + \" \" + \"Mundo\"",
+                "explanation": "Para agregar un espacio manual, insertamos una cadena de texto que solo contenga un espacio: <code>\" \"</code>.",
+                "example": "<code>nombre = \"Luz\" + \" \" + \"Paz\"</code><br><span class='text-gray-500'># Resultado: \"Luz Paz\"</span>",
+                "hints": [
+                    "Necesitas agregar texto.",
+                    "El texto debe ser solo un espacio.",
+                    "Usa las comillas con un espacio en medio."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Recibiste el precio en formato texto <code>\"150\"</code>. Necesitas transformarlo a entero.",
+                "question": "Completa para convertirlo a número: <code>precio_num = {0}(\"150\")</code>",
+                "code": "<code>precio_num = {0}(\"150\")</code>",
+                "answers": [
+                    [
+                        "int"
+                    ]
+                ],
+                "exact_answer": "precio_num = int(\"150\")",
+                "explanation": "Usamos la función <code>int()</code> para transformar el string en un integer.",
+                "example": "<code>cantidad = int(\"5\")</code><br><span class='text-gray-500'># Resultado: 5 (número)</span>",
+                "hints": [
+                    "Abreviatura de integer.",
+                    "Son 3 letras.",
+                    "Empieza con 'i'."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Tenemos el número de orden <code>402</code>, y lo queremos pegar a la palabra 'Orden '.",
+                "question": "Convierte el número a texto (string) en este código: <code>mensaje = \"Orden \" + {0}(402)</code>",
+                "code": "<code>mensaje = \"Orden \" + {0}(402)</code>",
+                "answers": [
+                    [
+                        "str"
+                    ]
+                ],
+                "exact_answer": "mensaje = \"Orden \" + str(402)",
+                "explanation": "Para convertir un número a texto usamos <code>str()</code>, que viene de la palabra 'string' (cadena de texto en inglés).",
+                "example": "<code>texto = \"ID: \" + str(99)</code><br><span class='text-gray-500'># Resultado: \"ID: 99\"</span>",
+                "hints": [
+                    "Abreviatura de string.",
+                    "Son 3 letras.",
+                    "Empieza con 's'."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Tienes las variables de texto <code>parte1 = \"Py\"</code> y <code>parte2 = \"thon\"</code>.",
+                "question": "Escribe el código para asignar a la variable <code>lenguaje</code> la concatenación (suma) de <code>parte1</code> y <code>parte2</code>.",
+                "exact_answer": "lenguaje = parte1 + parte2",
+                "explanation": "Simplemente usamos el signo <code>+</code> entre ambas variables de texto.",
+                "example": "<code>unido = a + b</code><br><span class='text-gray-500'># Resultado: Unión de textos</span>",
+                "hints": [
+                    "Empieza con <code>lenguaje =</code>.",
+                    "Usa las variables dadas.",
+                    "Usa el signo más."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Tienes la variable numérica <code>edad = 25</code>. Necesitas convertirla explícitamente a número entero por seguridad en el sistema.",
+                "question": "Escribe el código para actualizar la variable <code>edad</code> convirtiéndola a entero con la función <code>int()</code>.",
+                "exact_answer": "edad = int(edad)",
+                "explanation": "Al poner <code>edad = int(edad)</code>, Python toma el valor, asegura que sea número y lo guarda en la misma variable.",
+                "example": "<code>puntos = int(puntos)</code><br><span class='text-gray-500'># Fuerzas a que sea entero</span>",
+                "hints": [
+                    "Variable a la izquierda: <code>edad</code>.",
+                    "Asignar usando <code>=</code>.",
+                    "Llamar a <code>int()</code> y pasarle <code>edad</code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Tenemos el número de caja guardado en <code>num_caja = 5</code>.",
+                "question": "Escribe el código para asignar a la variable <code>caja_texto</code> la conversión de <code>num_caja</code> a string (texto).",
+                "exact_answer": "caja_texto = str(num_caja)",
+                "explanation": "Escribimos <code>caja_texto = str(num_caja)</code>. Ahora el número 5 se guardó como el texto '5', listo para ser impreso o sumado a otra palabra.",
+                "example": "<code>id_texto = str(id_num)</code><br><span class='text-gray-500'># Pasa número a texto</span>",
+                "hints": [
+                    "Variable a la izquierda: <code>caja_texto</code>.",
+                    "Usa la función <code>str()</code>.",
+                    "El argumento es la variable <code>num_caja</code>."
+                ]
+            }
+        ]
+    },
+    {
+        "id": 5,
+        "moduleNum": 3,
+        "moduleName": "Módulo 3: Colecciones",
+        "levelName": "Nivel 1: Listas",
+        "title": "1. Listas y Secuencias",
+        "theory": "Las listas nos permiten guardar varios elementos ordenados en una sola variable.",
+        "theory_expanded": "Imagina una lista de tareas en un papel. Tienes un elemento debajo del otro, en un orden específico. En Python, las listas (o 'lists') funcionan igual. Nos sirven para almacenar una colección de datos (nombres, números, ¡lo que sea!) en una misma variable. Para crear una lista, usamos los corchetes <code>[]</code> y separamos los elementos con comas.<hr class='my-4 border-gray-200'><h3>Machete (Resumen):</h3><pre class='bg-gray-800 text-green-400 p-2 rounded mt-2 text-xs'># Listas:\nlista = [1, 2, 3]\nprimero = lista[0]\nlista.append(4)\n\n# Diccionarios:\ndicc = {\"clave\": \"valor\"}\nval = dicc[\"clave\"]\ndicc[\"nueva\"] = 10</pre>",
+        "exercises": [
+            {
+                "type": "multiple_choice",
+                "context": "Quieres guardar el nombre de tres estudiantes en el registro escolar.",
+                "question": "¿Cuál es la sintaxis correcta para crear una lista de alumnos?",
+                "options": [
+                    "alumnos = (\"Ana\", \"Luis\", \"Marta\")",
+                    "alumnos = [\"Ana\", \"Luis\", \"Marta\"]",
+                    "alumnos = {\"Ana\", \"Luis\", \"Marta\"}"
+                ],
+                "correct": 1,
+                "exact_answer": "alumnos = [\"Ana\", \"Luis\", \"Marta\"]",
+                "explanation": "Las listas en Python siempre se definen usando los corchetes cuadrados <code>[]</code>. Los paréntesis son para 'tuplas' y las llaves para 'diccionarios' o 'sets'.",
+                "example": "<code>nombres = [\"Luz\", \"Paz\"]</code><br><span class='text-gray-500'># Resultado: Crea lista</span>",
+                "hints": [
+                    "Busca los corchetes cuadrados.",
+                    "Es el símbolo <code>[ ]</code>.",
+                    "Cada elemento va separado por coma."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Tienes una lista con edades: <code>edades = [15, 18, 20]</code>.",
+                "question": "¿Cómo accedes a la primera edad (el número 15)?",
+                "options": [
+                    "edades[1]",
+                    "edades[0]",
+                    "edades.first()"
+                ],
+                "correct": 1,
+                "exact_answer": "edades[0]",
+                "explanation": "En Python, los índices empiezan a contar desde el 0. Por lo tanto, el primer elemento siempre será el elemento en la posición 0.",
+                "example": "<code>primero = lista[0]</code><br><span class='text-gray-500'># Resultado: 15</span>",
+                "hints": [
+                    "En programación, casi siempre se empieza a contar desde 0.",
+                    "El 1 sería el segundo elemento.",
+                    "La respuesta es 0."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Necesitamos añadir un nuevo alumno al final de la lista.",
+                "question": "¿Qué método se utiliza para agregar un elemento al final de una lista?",
+                "options": [
+                    "add()",
+                    "insert()",
+                    "append()"
+                ],
+                "correct": 2,
+                "exact_answer": "append()",
+                "explanation": "El método <code>append()</code> es la forma estándar en Python de añadir (o 'adjuntar') un nuevo valor justo al final de la lista.",
+                "example": "<code>alumnos.append(\"Leo\")</code><br><span class='text-gray-500'># Añade Leo a la lista</span>",
+                "hints": [
+                    "Empieza con 'a'.",
+                    "Significa adjuntar en inglés.",
+                    "Es <code>append()</code>."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Vamos a crear una lista de precios para nuestros productos.",
+                "question": "Completa el código para crear una lista: <code>precios = {0}100, 200, 300{1}</code>",
+                "code": "<code>precios = {0}100, 200, 300{1}</code>",
+                "answers": [
+                    [
+                        "["
+                    ],
+                    [
+                        "]"
+                    ]
+                ],
+                "exact_answer": "precios = [100, 200, 300]",
+                "explanation": "Las listas se encierran siempre entre corchetes cuadrados. El de apertura <code>[</code> va al inicio y el de cierre <code>]</code> al final.",
+                "example": "<code>nums = [1, 2]</code><br><span class='text-gray-500'># Resultado: [1, 2]</span>",
+                "hints": [
+                    "Usa corchete cuadrado.",
+                    "Al principio va el que abre.",
+                    "Al final va el que cierra."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Tienes la lista <code>notas = [8, 9, 10]</code>. Quieres sacar la nota del medio (el 9).",
+                "question": "Completa para acceder a la segunda posición: <code>mitad = notas[{0}]</code>",
+                "code": "<code>mitad = notas[{0}]</code>",
+                "answers": [
+                    [
+                        "1"
+                    ]
+                ],
+                "exact_answer": "mitad = notas[1]",
+                "explanation": "Como Python empieza a contar en 0 (0 es la primera posición), el segundo elemento ocupa la posición o índice 1.",
+                "example": "<code>segundo = lista[1]</code><br><span class='text-gray-500'># Obtiene el elemento 2</span>",
+                "hints": [
+                    "Si 0 es el primero...",
+                    "El segundo debe ser el siguiente número.",
+                    "Es el número 1."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "El registro <code>ventas</code> está vacío, y queremos agregar la primera venta de 50.",
+                "question": "Completa el uso del método para agregar: <code>ventas.{0}(50)</code>",
+                "code": "<code>ventas.{0}(50)</code>",
+                "answers": [
+                    [
+                        "append"
+                    ]
+                ],
+                "exact_answer": "ventas.append(50)",
+                "explanation": "El método es <code>append</code>. Asegúrate de escribirlo correctamente con doble 'p'.",
+                "example": "<code>lista.append(5)</code><br><span class='text-gray-500'># Agrega el 5</span>",
+                "hints": [
+                    "Es el método visto en las preguntas de opción múltiple.",
+                    "Tiene doble letra p.",
+                    "La palabra es <code>append</code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Necesitas iniciar el sistema con una lista de usuarios vacía.",
+                "question": "Crea una variable <code>usuarios</code> y asígnale una lista completamente vacía.",
+                "exact_answer": "usuarios = []",
+                "explanation": "Una lista vacía se crea usando simplemente los corchetes sin nada adentro: <code>[]</code>.",
+                "example": "<code>items = []</code><br><span class='text-gray-500'># Lista vacía</span>",
+                "hints": [
+                    "Variable: <code>usuarios</code>.",
+                    "Signo igual.",
+                    "Solo los corchetes abiertos y cerrados: <code>[]</code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Tienes la lista de <code>entregas</code>. Un nuevo paquete de 24 horas acaba de ingresar.",
+                "question": "Escribe el código para agregar el número 24 al final de la lista <code>entregas</code> usando el método correspondiente.",
+                "exact_answer": "entregas.append(24)",
+                "explanation": "Se escribe <code>entregas.append(24)</code>. Primero la variable, luego punto, el método y entre paréntesis el valor.",
+                "example": "<code>caja.append(10)</code><br><span class='text-gray-500'># Resultado: Agrega 10</span>",
+                "hints": [
+                    "La lista se llama <code>entregas</code>.",
+                    "Usa el método <code>append</code>.",
+                    "El argumento es 24 entre paréntesis."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Hay 5 empleados en la lista <code>empleados</code>. Quieres saber cuántos hay sin contarlos manualmente.",
+                "question": "Asigna a la variable <code>cantidad</code> el largo de la lista <code>empleados</code> usando la función de longitud.",
+                "exact_answer": "cantidad = len(empleados)",
+                "explanation": "La función <code>len()</code> (de length) nos devuelve la cantidad de elementos que hay dentro de una lista u otra colección.",
+                "example": "<code>total = len(lista)</code><br><span class='text-gray-500'># Cuenta los elementos</span>",
+                "hints": [
+                    "Empieza con <code>cantidad =</code>.",
+                    "Usa la función <code>len()</code>.",
+                    "Pon <code>empleados</code> dentro del paréntesis."
+                ]
+            }
+        ]
+    },
+    {
+        "id": 6,
+        "moduleNum": 3,
+        "moduleName": "Módulo 3: Colecciones",
+        "levelName": "Nivel 2: Diccionarios",
+        "title": "2. Diccionarios de Datos",
+        "theory": "Los diccionarios guardan la información en pares de clave y valor (llave-valor).",
+        "theory_expanded": "Imagina la libreta de contactos de tu teléfono. No guardas los números en una simple lista, porque no sabrías de quién es cada uno. Los guardas asociando un 'Nombre' (la clave) a un 'Número' (el valor). Los diccionarios en Python hacen exactamente esto usando llaves <code>{}</code>. Por ejemplo, <code>{\"Ana\": 1234}</code>. Son vitales en la programación de aplicaciones web y análisis de datos.<hr class='my-4 border-gray-200'><h3>Machete (Resumen):</h3><pre class='bg-gray-800 text-green-400 p-2 rounded mt-2 text-xs'># Listas:\nlista = [1, 2, 3]\nprimero = lista[0]\nlista.append(4)\n\n# Diccionarios:\ndicc = {\"clave\": \"valor\"}\nval = dicc[\"clave\"]\ndicc[\"nueva\"] = 10</pre>",
+        "exercises": [
+            {
+                "type": "multiple_choice",
+                "context": "Vas a guardar el nivel de un jugador asociado a su nombre.",
+                "question": "¿Qué símbolo se usa para crear o abrir un diccionario?",
+                "options": [
+                    "Corchetes [ ]",
+                    "Paréntesis ( )",
+                    "Llaves { }"
+                ],
+                "correct": 2,
+                "exact_answer": "Llaves { }",
+                "explanation": "Los diccionarios siempre se crean envolviendo sus datos en llaves (curly braces) <code>{}</code>.",
+                "example": "<code>datos = {}</code><br><span class='text-gray-500'># Diccionario vacío</span>",
+                "hints": [
+                    "Las listas usan corchetes.",
+                    "Las funciones usan paréntesis.",
+                    "Los diccionarios usan llaves."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Dentro de un diccionario, queremos guardar que 'Google Ads' trajo 1100 leads.",
+                "question": "¿Cómo separamos la 'clave' del 'valor' en la declaración?",
+                "options": [
+                    "\"Google Ads\" = 1100",
+                    "\"Google Ads\" : 1100",
+                    "\"Google Ads\" -> 1100"
+                ],
+                "correct": 1,
+                "exact_answer": "\"Google Ads\" : 1100",
+                "explanation": "En un diccionario, cada elemento es un par. Se usa el símbolo de dos puntos <code>:</code> para separar el nombre de la clave y el valor asignado.",
+                "example": "<code>{\"Edad\": 25}</code><br><span class='text-gray-500'># Clave Edad, valor 25</span>",
+                "hints": [
+                    "El signo de asignación normal no sirve dentro.",
+                    "Se utiliza el signo de puntuación con dos puntos verticales.",
+                    "Es <code>:</code>."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Tienes el diccionario <code>campanas = {\"Ads\": 1100}</code>.",
+                "question": "¿Cómo accedes al valor 1100?",
+                "options": [
+                    "campanas[0]",
+                    "campanas[\"Ads\"]",
+                    "campanas.Ads"
+                ],
+                "correct": 1,
+                "exact_answer": "campanas[\"Ads\"]",
+                "explanation": "A diferencia de las listas donde usamos números (índices), en los diccionarios accedemos usando la clave exacta entre corchetes cuadrados.",
+                "example": "<code>total = datos[\"Clave\"]</code><br><span class='text-gray-500'># Acceso por clave</span>",
+                "hints": [
+                    "Los diccionarios no tienen orden numérico (0,1,2).",
+                    "Se usa la clave para buscar.",
+                    "Va entre corchetes."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Vamos a crear el diccionario de ventas del centro.",
+                "question": "Completa la creación del diccionario: <code>sucursal = {0}\"ventas\": 8200{1}</code>",
+                "code": "<code>sucursal = {0}\"ventas\": 8200{1}</code>",
+                "answers": [
+                    [
+                        "{"
+                    ],
+                    [
+                        "}"
+                    ]
+                ],
+                "exact_answer": "sucursal = {\"ventas\": 8200}",
+                "explanation": "Debe abrir y cerrar con llaves <code>{}</code>.",
+                "example": "<code>d = {\"a\": 1}</code><br><span class='text-gray-500'># Diccionario básico</span>",
+                "hints": [
+                    "Necesitas llaves.",
+                    "Una de apertura al principio.",
+                    "Otra de cierre al final."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Tienes el diccionario <code>precios = {\"Cafe\": 1.5, \"Te\": 1.0}</code>. Quieres el precio del Te.",
+                "question": "Completa para obtener el valor del Te: <code>valor = precios[{0}]</code>",
+                "code": "<code>valor = precios[{0}]</code>",
+                "answers": [
+                    [
+                        "\"Te\"",
+                        "'Te'"
+                    ]
+                ],
+                "exact_answer": "valor = precios[\"Te\"]",
+                "explanation": "Para acceder, usamos el nombre de la clave exacta entre comillas. En este caso es <code>\"Te\"</code>.",
+                "example": "<code>valor = d[\"Cafe\"]</code><br><span class='text-gray-500'># Da 1.5</span>",
+                "hints": [
+                    "Usa la palabra exacta.",
+                    "Es una cadena de texto, necesita comillas.",
+                    "La palabra es \"Te\"."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "El cliente acaba de comprar un producto. Agreguémoslo al carrito.",
+                "question": "Completa para crear una nueva clave 'mouse' en <code>carrito</code>: <code>carrito[{0}] = 25</code>",
+                "code": "<code>carrito[{0}] = 25</code>",
+                "answers": [
+                    [
+                        "\"mouse\"",
+                        "'mouse'"
+                    ]
+                ],
+                "exact_answer": "carrito[\"mouse\"] = 25",
+                "explanation": "Para añadir o modificar algo en un diccionario, pones la nueva clave entre corchetes y le asignas un valor con el igual.",
+                "example": "<code>datos[\"nuevo\"] = 10</code><br><span class='text-gray-500'># Agrega la clave</span>",
+                "hints": [
+                    "La nueva clave es 'mouse'.",
+                    "Necesita comillas.",
+                    "Escríbelo tal cual."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Necesitamos un diccionario vacío para empezar a almacenar la configuración de la app.",
+                "question": "Crea una variable <code>config</code> y asígnale un diccionario completamente vacío.",
+                "exact_answer": "config = {}",
+                "explanation": "Un diccionario vacío se crea usando las llaves de apertura y cierre sin nada en el interior: <code>{}</code>.",
+                "example": "<code>data = {}</code><br><span class='text-gray-500'># Crea el diccionario</span>",
+                "hints": [
+                    "Variable: <code>config</code>.",
+                    "Operador de asignación.",
+                    "Dos llaves vacías."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Tienes el diccionario <code>alumno</code> y quieres actualizar su calificación.",
+                "question": "Escribe el código para asignarle a la clave <code>\"nota\"</code> el valor de 10 dentro del diccionario <code>alumno</code>.",
+                "exact_answer": "alumno[\"nota\"] = 10",
+                "explanation": "Llamas al diccionario, le pasas la clave entre corchetes, y le asignas el valor. Queda: <code>alumno[\"nota\"] = 10</code>.",
+                "example": "<code>user[\"edad\"] = 30</code><br><span class='text-gray-500'># Cambia o crea edad</span>",
+                "hints": [
+                    "Empieza llamando a <code>alumno</code>.",
+                    "Usa corchetes con <code>\"nota\"</code>.",
+                    "Asigna el valor 10."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Necesitas crear el perfil de un empleado con sus datos básicos en un diccionario.",
+                "question": "Declara <code>empleado</code> con un diccionario que tenga la clave <code>\"rol\"</code> y como valor <code>\"admin\"</code>.",
+                "exact_answer": "empleado = {\"rol\": \"admin\"}",
+                "explanation": "Hacemos la asignación de un diccionario que contiene un par llave-valor. No olvides los dos puntos entre la clave y el valor.",
+                "example": "<code>datos = {\"x\": \"y\"}</code><br><span class='text-gray-500'># Estructura básica</span>",
+                "hints": [
+                    "Empieza con <code>empleado =</code>.",
+                    "Abre llave <code>{</code>.",
+                    "Escribe <code>\"rol\": \"admin\"</code> y cierra llave."
+                ]
+            }
+        ]
+    },
+    {
+        "id": 7,
+        "moduleNum": 4,
+        "moduleName": "Módulo 4: Condicionales (IF)",
+        "levelName": "Nivel 1: Comparaciones",
+        "title": "1. Operadores de Comparación",
+        "theory": "Antes de tomar una decisión, necesitamos comparar datos para ver si cumplen una condición.",
+        "theory_expanded": "Para que un programa tome decisiones, primero debe hacerse preguntas de SÍ o NO. '¿Son los gastos mayores a las ventas?'. Para esto usamos operadores de comparación: <code>></code> (mayor), <code><</code> (menor), <code>>=</code> (mayor o igual), <code><=</code> (menor o igual), y <code>==</code> (exactamente igual). El resultado de estas operaciones siempre es un booleano (True o False).<hr class='my-4 border-gray-200'><h3>Machete (Resumen):</h3><pre class='bg-gray-800 text-green-400 p-2 rounded mt-2 text-xs'># Comparaciones:\n== (Igual)\n!= (Distinto)\n>  (Mayor), >= (Mayor o igual)\n<  (Menor), <= (Menor o igual)\n\n# Sentencia IF:\nif edad >= 18:\n    print(\"Mayor\")\nelse:\n    print(\"Menor\")</pre>",
+        "exercises": [
+            {
+                "type": "multiple_choice",
+                "context": "Estás validando si un usuario ingresó la contraseña correcta.",
+                "question": "¿Qué operador usas para verificar si <code>clave_ingresada</code> es exactamente igual a <code>\"1234\"</code>?",
+                "options": [
+                    "=",
+                    "==",
+                    "==="
+                ],
+                "correct": 1,
+                "exact_answer": "==",
+                "explanation": "En Python, un solo <code>=</code> se usa para guardar/asignar variables. Para comparar si dos cosas son idénticas, siempre se debe usar el doble igual <code>==</code>.",
+                "example": "<code>es_igual = (5 == 5)</code><br><span class='text-gray-500'># Resultado: True</span>",
+                "hints": [
+                    "Recuerda que = ya se usa para asignar.",
+                    "Necesitamos diferenciar la comparación.",
+                    "Son dos signos iguales."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "El sistema solo permite registrar usuarios mayores de edad.",
+                "question": "¿Qué operador verifica si la edad es 'mayor o igual' a 18?",
+                "options": [
+                    ">",
+                    "=>",
+                    ">="
+                ],
+                "correct": 2,
+                "exact_answer": ">=",
+                "explanation": "El símbolo de mayor se escribe primero, seguido del igual: <code>>=</code>. Al revés (=>) provocará un error de sintaxis.",
+                "example": "<code>valido = (edad >= 18)</code><br><span class='text-gray-500'># Resultado: True/False</span>",
+                "hints": [
+                    "El símbolo de la flecha va primero.",
+                    "Luego va el igual.",
+                    "Es <code>>=</code>."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Queremos revisar si hay algún error en el proceso.",
+                "question": "Si queremos verificar que el estado sea 'diferente' (no igual) a \"ok\", ¿qué operador usamos?",
+                "options": [
+                    "<>",
+                    "!=",
+                    "!=="
+                ],
+                "correct": 1,
+                "exact_answer": "!=",
+                "explanation": "En Python, el signo de exclamación significa 'NO'. Por lo tanto, <code>!=</code> significa 'NO IGUAL' (o diferente).",
+                "example": "<code>hay_error = (estado != \"ok\")</code><br><span class='text-gray-500'># Resultado: True/False</span>",
+                "hints": [
+                    "Empieza con un signo de exclamación.",
+                    "Sigue con un signo igual.",
+                    "Es <code>!=</code>."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Vamos a revisar si un cliente superó su límite de crédito.",
+                "question": "Completa para evaluar si <code>gastos</code> es estrictamente mayor que <code>limite</code>.",
+                "code": "<code>excedido = gastos {0} limite</code>",
+                "answers": [
+                    [
+                        ">"
+                    ]
+                ],
+                "exact_answer": "excedido = gastos > limite",
+                "explanation": "El símbolo <code>></code> se lee como 'mayor que'. Nos dará True si el número de la izquierda es más grande.",
+                "example": "<code>riesgo = (10 > 5)</code><br><span class='text-gray-500'># Resultado: True</span>",
+                "hints": [
+                    "La boca abierta del símbolo siempre apunta al más grande.",
+                    "Queremos que gastos sea el mayor.",
+                    "El símbolo es <code>></code>."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Para aplicar un descuento del 10%, el total de la compra debe superar los 500.",
+                "question": "Completa para comparar si el <code>total</code> es mayor a 500.",
+                "code": "<code>aplica = total {0} 500</code>",
+                "answers": [
+                    [
+                        ">"
+                    ]
+                ],
+                "exact_answer": "aplica = total > 500",
+                "explanation": "Nuevamente utilizamos el operador de mayor que <code>></code>.",
+                "example": "<code>bono = (ventas > 100)</code><br><span class='text-gray-500'># Evalúa bono</span>",
+                "hints": [
+                    "Mayor que.",
+                    "El símbolo <code>></code>."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Validamos que el nivel de satisfacción de un usuario no haya caído por debajo de 50.",
+                "question": "Completa la verificación de si <code>satisfaccion</code> es menor que 50.",
+                "code": "<code>alerta = satisfaccion {0} 50</code>",
+                "answers": [
+                    [
+                        "<"
+                    ]
+                ],
+                "exact_answer": "alerta = satisfaccion < 50",
+                "explanation": "El símbolo de menor que <code><</code> tiene la parte estrecha apuntando hacia la izquierda.",
+                "example": "<code>bajo = (nivel < 10)</code><br><span class='text-gray-500'># Resultado: True/False</span>",
+                "hints": [
+                    "Menor que.",
+                    "Apunta a la izquierda.",
+                    "Es <code><</code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "El sistema exige que el usuario ingrese la cantidad mínima de leads requerida, y esta debe ser mayor a 0.",
+                "question": "Crea la variable <code>valido</code> y asígnale la evaluación de si <code>leads</code> es mayor a 0.",
+                "exact_answer": "valido = leads > 0",
+                "explanation": "Escribimos <code>valido = leads > 0</code>. Esto evaluará la expresión y guardará True o False en la variable.",
+                "example": "<code>ok = (stock > 0)</code><br><span class='text-gray-500'># Verifica stock</span>",
+                "hints": [
+                    "Empieza con <code>valido =</code>.",
+                    "Compara la variable <code>leads</code>.",
+                    "Mayor que 0."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Queremos saber si las ventas mensuales alcanzaron el objetivo exacto.",
+                "question": "Asigna a <code>objetivo_cumplido</code> la evaluación de si <code>ventas</code> es igual a <code>meta</code>.",
+                "exact_answer": "objetivo_cumplido = ventas == meta",
+                "explanation": "Es vital usar doble igual <code>==</code> para la comparación. Queda: <code>objetivo_cumplido = ventas == meta</code>.",
+                "example": "<code>empate = (puntos == 10)</code><br><span class='text-gray-500'># Compara igualdades</span>",
+                "hints": [
+                    "Variable: <code>objetivo_cumplido</code>.",
+                    "Usa la variable <code>ventas</code>.",
+                    "El operador de igualdad es <code>==</code> frente a <code>meta</code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Verificamos si un producto sigue en fase de producción (aún no terminado).",
+                "question": "Escribe el código para asignar a <code>produccion</code> si el texto de la variable <code>estado</code> es distinto (no igual) a \"Terminado\".",
+                "exact_answer": "produccion = estado != \"Terminado\"",
+                "explanation": "Usamos el operador distinto: <code>!=</code>. <code>produccion = estado != \"Terminado\"</code>.",
+                "example": "<code>falta = (dia != \"Viernes\")</code><br><span class='text-gray-500'># Es distinto</span>",
+                "hints": [
+                    "Variable: <code>produccion</code>.",
+                    "Usa la variable <code>estado</code>.",
+                    "El operador es <code>!=</code> seguido del texto entre comillas."
+                ]
+            }
+        ]
+    },
+    {
+        "id": 8,
+        "moduleNum": 4,
+        "moduleName": "Módulo 4: Condicionales (IF)",
+        "levelName": "Nivel 2: Tomando Decisiones",
+        "title": "2. La Sentencia IF",
+        "theory": "Con <code>if</code> y <code>else</code>, el código puede ejecutar diferentes instrucciones dependiendo de una condición.",
+        "theory_expanded": "Una vez que tenemos una comparación (True o False), podemos usar <code>if</code> (SI ocurre esto...) para ejecutar código solo cuando la condición es Verdadera. Si es falsa, podemos usar <code>else</code> (SINO, haz esto otro...). Lo crucial en Python es que el código que va dentro del if debe estar 'indentado' (con espacios o tabulación hacia la derecha) para indicar que le pertenece.<hr class='my-4 border-gray-200'><h3>Machete (Resumen):</h3><pre class='bg-gray-800 text-green-400 p-2 rounded mt-2 text-xs'># Comparaciones:\n== (Igual)\n!= (Distinto)\n>  (Mayor), >= (Mayor o igual)\n<  (Menor), <= (Menor o igual)\n\n# Sentencia IF:\nif edad >= 18:\n    print(\"Mayor\")\nelse:\n    print(\"Menor\")</pre>",
+        "exercises": [
+            {
+                "type": "multiple_choice",
+                "context": "Quieres enviar una alerta si los gastos superan los ingresos mensuales.",
+                "question": "¿Cuál es la sintaxis correcta para iniciar un bloque if en Python?",
+                "options": [
+                    "if gastos > ingresos",
+                    "if gastos > ingresos:",
+                    "if (gastos > ingresos) {"
+                ],
+                "correct": 1,
+                "exact_answer": "if gastos > ingresos:",
+                "explanation": "La línea de una condición <code>if</code> en Python siempre termina con dos puntos <code>:</code>. No usa llaves ni requiere paréntesis.",
+                "example": "<code>if edad >= 18:</code><br><code>    print(\"Mayor\")</code><br><span class='text-gray-500'># IF básico</span>",
+                "hints": [
+                    "Python no usa llaves <code>{}</code>.",
+                    "Requiere un signo de puntuación al final de la línea.",
+                    "Son los dos puntos <code>:</code>."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Continuando con el ejemplo anterior.",
+                "question": "¿Cómo sabe Python qué código pertenece al bloque if?",
+                "options": [
+                    "Porque el código está indentado (tiene espacios a la izquierda).",
+                    "Por la palabra 'end'.",
+                    "Porque está en la línea siguiente."
+                ],
+                "correct": 0,
+                "exact_answer": "Porque el código está indentado (tiene espacios a la izquierda).",
+                "explanation": "La sangría o 'indentación' es obligatoria en Python. Todo el código que tenga espacios extra a la izquierda pertenecerá al bloque <code>if</code>.",
+                "example": "<code>if True:</code><br><code>    # Esto está dentro</code><br><code># Esto está fuera</code>",
+                "hints": [
+                    "Python no usa palabras clave como 'end' para cerrar.",
+                    "Depende puramente de la estructura visual.",
+                    "Son los espacios o tabulaciones."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Quieres ejecutar un plan B en caso de que la condición principal no se cumpla.",
+                "question": "¿Qué palabra clave se usa para capturar el caso en el que el if es falso?",
+                "options": [
+                    "elseif:",
+                    "else:",
+                    "otherwise:"
+                ],
+                "correct": 1,
+                "exact_answer": "else:",
+                "explanation": "La palabra <code>else:</code> (que significa 'sino' o 'de lo contrario') se usa para definir el bloque alternativo. También debe terminar con dos puntos.",
+                "example": "<code>if False:</code><br><code>    # ...</code><br><code>else:</code><br><code>    # Ejecuta esto</code>",
+                "hints": [
+                    "Significa 'de lo contrario' en inglés.",
+                    "Es una palabra de cuatro letras.",
+                    "Es <code>else:</code>."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Validemos si una sucursal logró rentabilidad.",
+                "question": "Completa el inicio del condicional if: <code>{0} rentabilidad > 15{1}</code>",
+                "code": "<code>{0} rentabilidad > 15{1}</code>",
+                "answers": [
+                    [
+                        "if"
+                    ],
+                    [
+                        ":"
+                    ]
+                ],
+                "exact_answer": "if rentabilidad > 15:",
+                "explanation": "Iniciamos la línea con <code>if</code> (en minúsculas), escribimos la condición, y cerramos estrictamente con dos puntos <code>:</code>.",
+                "example": "<code>if x > 0:</code><br><code>    print(\"Positivo\")</code>",
+                "hints": [
+                    "Primera palabra: <code>if</code>.",
+                    "Al final, se usan dos puntos.",
+                    "Es el signo <code>:</code>."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Queremos verificar si el usuario tiene rol de 'admin' para darle acceso.",
+                "question": "Completa la condición de igualdad: <code>if rol {0} \"admin\":</code>",
+                "code": "<code>if rol {0} \"admin\":</code>",
+                "answers": [
+                    [
+                        "=="
+                    ]
+                ],
+                "exact_answer": "if rol == \"admin\":",
+                "explanation": "Recuerda que dentro del if debemos usar el operador de comparación <code>==</code> para ver si son iguales, no un solo igual.",
+                "example": "<code>if tipo == \"vip\":</code>",
+                "hints": [
+                    "No usamos un solo igual.",
+                    "Usamos doble igual.",
+                    "Es <code>==</code>."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "El sistema deniega el acceso si el if anterior no se cumple.",
+                "question": "Completa la palabra clave alternativa: <code>{0}: print(\"Acceso denegado\")</code>",
+                "code": "<code>{0}:</code><br><code>    print(\"Acceso denegado\")</code>",
+                "answers": [
+                    [
+                        "else"
+                    ]
+                ],
+                "exact_answer": "else:",
+                "explanation": "Usamos <code>else</code>. Nota cómo no lleva una condición al lado, simplemente termina en dos puntos, ya que atrapa todo lo que fue falso arriba.",
+                "example": "<code>else:</code><br><code>    print(\"Error\")</code>",
+                "hints": [
+                    "Atrapa todo lo demás.",
+                    "En inglés es 'Sino'.",
+                    "Es <code>else</code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "El límite de horas de entrega aceptable es 48. La variable actual es <code>horas_entrega</code>.",
+                "question": "Escribe el inicio de la sentencia if para verificar si <code>horas_entrega</code> superó (mayor a) 48.",
+                "exact_answer": "if horas_entrega > 48:",
+                "explanation": "Escribimos <code>if horas_entrega > 48:</code> (¡no te olvides de los dos puntos al final!).",
+                "example": "<code>if demora > 10:</code>",
+                "hints": [
+                    "Empieza con <code>if</code>.",
+                    "Compara la variable con 48 usando mayor que.",
+                    "Cierra con dos puntos."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Si el cliente compró más de 10 unidades, entra en la categoría mayorista.",
+                "question": "Escribe el inicio de la sentencia if para verificar si la variable <code>unidades</code> es mayor o igual a 10.",
+                "exact_answer": "if unidades >= 10:",
+                "explanation": "Usamos el operador mayor o igual: <code>if unidades >= 10:</code>.",
+                "example": "<code>if stock >= 50:</code>",
+                "hints": [
+                    "Empieza con <code>if</code>.",
+                    "Usa mayor o igual <code>>=</code>.",
+                    "Cierra con <code>:</code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Añadimos un bloque alternativo por si las unidades fueron menores a 10.",
+                "question": "Escribe únicamente la línea que declara el bloque alternativo (Sino).",
+                "exact_answer": "else:",
+                "explanation": "La línea completa solo necesita la palabra <code>else</code> seguida de los dos puntos: <code>else:</code>.",
+                "example": "<code>else:</code>",
+                "hints": [
+                    "Es una palabra de cuatro letras.",
+                    "Lleva dos puntos al final.",
+                    "<code>else:</code>."
+                ]
+            }
+        ]
+    },
+    {
+        "id": 9,
+        "moduleNum": 5,
+        "moduleName": "Módulo 5: Bucles (FOR)",
+        "levelName": "Nivel 1: Iteración Básica",
+        "title": "1. El Bucle FOR",
+        "theory": "El bucle <code>for</code> nos permite repetir un bloque de código por cada elemento que exista dentro de una colección (como una lista).",
+        "theory_expanded": "Imagina que tienes una lista de 5 entregas y tienes que revisar el tiempo de cada una. Podrías escribir el mismo código 5 veces, pero ¿qué pasa si tienes 100 entregas? El bucle <code>for</code> (que en español significa 'por' o 'para') hace el trabajo pesado: toma el primer elemento, ejecuta el código, luego toma el segundo, y así hasta terminar la lista automáticamente.<hr class='my-4 border-gray-200'><h3>Machete (Resumen):</h3><pre class='bg-gray-800 text-green-400 p-2 rounded mt-2 text-xs'># Bucle FOR (Listas):\nfor num in numeros:\n    print(num)\n\n# Bucle FOR (Diccionarios):\nfor clave, valor in dicc.items():\n    print(clave, valor)</pre>",
+        "exercises": [
+            {
+                "type": "multiple_choice",
+                "context": "Tienes una lista <code>entregas = [12, 18, 24]</code> y quieres imprimir cada una.",
+                "question": "¿Cómo se lee conceptualmente la instrucción <code>for demora in entregas:</code>?",
+                "options": [
+                    "Por cada número 'demora' que esté dentro de la lista 'entregas':",
+                    "Mientras 'demora' sea igual a 'entregas':",
+                    "Para que 'demora' entre en 'entregas':"
+                ],
+                "correct": 0,
+                "exact_answer": "Por cada número 'demora' que esté dentro de la lista 'entregas':",
+                "explanation": "La lectura mental debe ser: 'Por cada (for) elemento individual (demora) en (in) la colección total (entregas)'. Python asignará automáticamente cada valor de la lista a la variable individual una y otra vez.",
+                "example": "<code>for num in numeros:</code><br><span class='text-gray-500'># Imprime todos los nums</span>",
+                "hints": [
+                    "La palabra 'for' indica iteración elemento por elemento.",
+                    "La variable intermedia representa al elemento actual.",
+                    "Significa: Por cada X en la lista Y."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Has iniciado tu bucle FOR.",
+                "question": "¿Qué signo de puntuación es obligatorio al final de la línea que declara el FOR?",
+                "options": [
+                    "; (punto y coma)",
+                    ": (dos puntos)",
+                    "Nada"
+                ],
+                "correct": 1,
+                "exact_answer": ": (dos puntos)",
+                "explanation": "Al igual que con la sentencia <code>if</code>, los bucles <code>for</code> requieren que la línea termine con dos puntos <code>:</code> para indicarle a Python que el bloque de código a repetir comenzará en la línea siguiente (indentado).",
+                "example": "<code>for x in lista:</code>",
+                "hints": [
+                    "Es el mismo signo que usa el IF.",
+                    "Sirve para abrir un nuevo bloque indentado.",
+                    "Son los dos puntos."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Quieres contar cuántas entregas tuvieron exceso de tiempo sumando 1 a un contador en cada paso.",
+                "question": "¿Dónde debe declararse la variable <code>demorados = 0</code>?",
+                "options": [
+                    "Dentro del bloque for, para que se reinicie siempre.",
+                    "Justo al final de todo el código.",
+                    "Antes de iniciar el bloque for."
+                ],
+                "correct": 2,
+                "exact_answer": "Antes de iniciar el bloque for.",
+                "explanation": "Si la declaras dentro del bucle, se reiniciará a 0 en cada paso y nunca acumulará el total. Siempre debes inicializar los contadores y acumuladores ANTES de entrar al ciclo.",
+                "example": "<code>contador = 0</code><br><code>for x in lista:</code>",
+                "hints": [
+                    "Necesitas que el valor persista durante todo el ciclo.",
+                    "Si lo pones dentro, se borrará en cada paso.",
+                    "Se debe crear antes."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Vamos a iterar sobre la lista de horas de entrega.",
+                "question": "Completa el inicio del bucle for: <code>{0} horas {1} entregas:</code>",
+                "code": "<code>{0} horas {1} entregas:</code>",
+                "answers": [
+                    [
+                        "for"
+                    ],
+                    [
+                        "in"
+                    ]
+                ],
+                "exact_answer": "for horas in entregas:",
+                "explanation": "Usamos <code>for</code> al principio y luego <code>in</code> para especificar la lista de la que extraeremos los elementos.",
+                "example": "<code>for item in lista:</code>",
+                "hints": [
+                    "Primera palabra: <code>for</code>.",
+                    "Segunda palabra: <code>in</code>."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Dentro del bucle, sumamos las horas totales.",
+                "question": "Completa el código indentado: <code>total_horas {0} horas</code>",
+                "code": "<code>total_horas {0} horas</code>",
+                "answers": [
+                    [
+                        "+="
+                    ]
+                ],
+                "exact_answer": "total_horas += horas",
+                "explanation": "Para ir acumulando un total paso a paso, usamos el operador de suma y asignación <code>+=</code>.",
+                "example": "<code>suma += num</code>",
+                "hints": [
+                    "Es el operador acortado.",
+                    "Signo más seguido del igual.",
+                    "<code>+=</code>."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Iteramos sobre la lista <code>ventas</code>.",
+                "question": "Completa la declaración asegurándote de no olvidar el signo final: <code>for venta in ventas{0}</code>",
+                "code": "<code>for venta in ventas{0}</code>",
+                "answers": [
+                    [
+                        ":"
+                    ]
+                ],
+                "exact_answer": "for venta in ventas:",
+                "explanation": "Siempre debemos terminar con los dos puntos <code>:</code>.",
+                "example": "<code>for v in ventas:</code>",
+                "hints": [
+                    "Falta un signo de puntuación.",
+                    "Es el que abre bloques indentados.",
+                    "Los dos puntos."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Tienes la lista <code>facturas</code>.",
+                "question": "Escribe la primera línea del bucle que itere usando la variable individual <code>monto</code>.",
+                "exact_answer": "for monto in facturas:",
+                "explanation": "Queda como <code>for monto in facturas:</code> (con dos puntos al final).",
+                "example": "<code>for m in facturas:</code>",
+                "hints": [
+                    "Escribe <code>for monto in facturas:</code>.",
+                    "Revisa los espacios.",
+                    "Acuérdate de los dos puntos."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Antes del bucle, necesitamos una variable para contar las facturas procesadas.",
+                "question": "Crea la variable <code>contador</code> y asígnale un valor inicial de 0.",
+                "exact_answer": "contador = 0",
+                "explanation": "Inicializamos a cero: <code>contador = 0</code>.",
+                "example": "<code>total_items = 0</code>",
+                "hints": [
+                    "Variable: <code>contador</code>.",
+                    "Valor: <code>0</code>.",
+                    "Asignación con <code>=</code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Ya dentro del bucle, cada vez que procesemos un elemento, queremos sumar 1 a la cuenta.",
+                "question": "Escribe la línea para incrementar la variable <code>contador</code> en 1 usando el operador acortado.",
+                "exact_answer": "contador += 1",
+                "explanation": "En cada vuelta del bucle, ejecutamos <code>contador += 1</code>.",
+                "example": "<code>pasos += 1</code>",
+                "hints": [
+                    "Inicia con <code>contador</code>.",
+                    "Usa <code>+=</code>.",
+                    "Suma el número <code>1</code>."
+                ]
+            }
+        ]
+    },
+    {
+        "id": 10,
+        "moduleNum": 5,
+        "moduleName": "Módulo 5: Bucles (FOR)",
+        "levelName": "Nivel 2: Iterando Diccionarios",
+        "title": "2. Bucle FOR en Diccionarios",
+        "theory": "Para iterar diccionarios, podemos usar el método <code>.items()</code> y procesar la clave y el valor al mismo tiempo.",
+        "theory_expanded": "Una lista solo tiene valores simples, pero un diccionario tiene Clave y Valor. Cuando hacemos un bucle sobre un diccionario de sucursales, queremos saber tanto el 'Nombre de la Sucursal' como 'Sus Ventas'. Para hacer esto, Python permite pedir dos variables temporales a la vez en el bucle FOR utilizando el método especial <code>.items()</code>.<hr class='my-4 border-gray-200'><h3>Machete (Resumen):</h3><pre class='bg-gray-800 text-green-400 p-2 rounded mt-2 text-xs'># Bucle FOR (Listas):\nfor num in numeros:\n    print(num)\n\n# Bucle FOR (Diccionarios):\nfor clave, valor in dicc.items():\n    print(clave, valor)</pre>",
+        "exercises": [
+            {
+                "type": "multiple_choice",
+                "context": "Tienes el diccionario <code>campanas = {\"Ads\": 1100, \"Insta\": 850}</code>.",
+                "question": "¿Qué método extrae ambos, la clave y el valor, para un bucle for?",
+                "options": [
+                    ".keys()",
+                    ".values()",
+                    ".items()"
+                ],
+                "correct": 2,
+                "exact_answer": ".items()",
+                "explanation": "El método <code>.items()</code> empaqueta el diccionario en pares para que el bucle for pueda leer tanto la clave (nombre de campaña) como el valor (leads obtenidos).",
+                "example": "<code>d.items()</code><br><span class='text-gray-500'># Retorna pares</span>",
+                "hints": [
+                    ".keys() solo trae claves.",
+                    ".values() solo trae valores.",
+                    ".items() trae los ítems completos (ambos)."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Al usar <code>.items()</code> el bucle nos entregará dos datos por vuelta.",
+                "question": "¿Cómo preparamos la línea for para recibir esos dos datos?",
+                "options": [
+                    "for canal y cant in campanas.items():",
+                    "for canal, cant in campanas.items():",
+                    "for [canal, cant] in campanas.items():"
+                ],
+                "correct": 1,
+                "exact_answer": "for canal, cant in campanas.items():",
+                "explanation": "Declaramos ambas variables separadas por una coma. En la primera vuelta, <code>canal</code> será 'Ads' y <code>cant</code> será 1100.",
+                "example": "<code>for clave, valor in dicc.items():</code>",
+                "hints": [
+                    "Se separan simplemente con una coma.",
+                    "No se usa 'y'.",
+                    "No requiere corchetes extra."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Dentro del bucle queremos filtrar, aplicando un <code>if</code>.",
+                "question": "En <code>for canal, cant in campanas.items():</code>, si queremos buscar las que superen los 1000 leads, ¿qué variable comparamos en el <code>if</code>?",
+                "options": [
+                    "canal",
+                    "cant",
+                    "campanas"
+                ],
+                "correct": 1,
+                "exact_answer": "cant",
+                "explanation": "La variable <code>cant</code> almacena el número de leads (el valor numérico). La variable <code>canal</code> solo tiene el nombre de la red social (texto). Comparamos <code>cant > 1000</code>.",
+                "example": "<code>if cant > 1000:</code>",
+                "hints": [
+                    "Los leads son números.",
+                    "El número está guardado en el 'valor'.",
+                    "El valor fue asignado a la segunda variable."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Vamos a escribir el bucle para el diccionario <code>sucursales</code>.",
+                "question": "Completa el uso del método correcto: <code>for nombre, datos in sucursales.{0}():</code>",
+                "code": "<code>for nombre, datos in sucursales.{0}():</code>",
+                "answers": [
+                    [
+                        "items"
+                    ]
+                ],
+                "exact_answer": "for nombre, datos in sucursales.items():",
+                "explanation": "Escribimos <code>items</code> (que lleva paréntesis al ser un método) para extraer las claves y valores.",
+                "example": "<code>for k, v in dict.items():</code>",
+                "hints": [
+                    "Es una palabra en inglés plural.",
+                    "Empieza con 'i'.",
+                    "Es <code>items</code>."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Recibimos la clave y el valor.",
+                "question": "Completa las variables temporales separándolas con coma: <code>for nombre{0} datos in sucursales.items():</code>",
+                "code": "<code>for nombre{0} datos in sucursales.items():</code>",
+                "answers": [
+                    [
+                        ",",
+                        ", "
+                    ]
+                ],
+                "exact_answer": "for nombre, datos in sucursales.items():",
+                "explanation": "Se usa la coma <code>,</code> para separar las múltiples variables que recibirán los datos del diccionario.",
+                "example": "<code>for a, b in dict.items():</code>",
+                "hints": [
+                    "Solo es un signo de puntuación.",
+                    "Sirve para separar elementos.",
+                    "Es la coma."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Dentro del bucle verificamos la venta. <code>datos</code> es el valor numérico.",
+                "question": "Completa la validación if de mayor a 5000: <code>{0} datos {1} 5000:</code>",
+                "code": "<code>{0} datos {1} 5000:</code>",
+                "answers": [
+                    [
+                        "if"
+                    ],
+                    [
+                        ">"
+                    ]
+                ],
+                "exact_answer": "if datos > 5000:",
+                "explanation": "Se aplica un <code>if</code> y el signo de mayor que <code>></code> para filtrar los elementos dentro del ciclo for.",
+                "example": "<code>if val > 100:</code>",
+                "hints": [
+                    "El primer hueco inicia el condicional.",
+                    "El segundo hueco es el operador de comparación de 'mayor que'."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Tienes el diccionario <code>clientes</code> con sus facturaciones.",
+                "question": "Escribe la primera línea completa del bucle para desempaquetar la clave en <code>empresa</code> y el valor en <code>facturacion</code> usando <code>items()</code>.",
+                "exact_answer": "for empresa, facturacion in clientes.items():",
+                "explanation": "Queda: <code>for empresa, facturacion in clientes.items():</code>.",
+                "example": "<code>for k, v in d.items():</code>",
+                "hints": [
+                    "Inicia con <code>for</code>.",
+                    "Variables <code>empresa, facturacion</code>.",
+                    "Finaliza con <code>in clientes.items():</code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Dentro del bucle, queremos verificar si la facturacion fue mayor a 2000000.",
+                "question": "Escribe la sentencia if requerida.",
+                "exact_answer": "if facturacion > 2000000:",
+                "explanation": "Escribimos <code>if facturacion > 2000000:</code>. Recuerda no usar comas ni puntos en el número.",
+                "example": "<code>if valor > 1000:</code>",
+                "hints": [
+                    "Inicia con <code>if</code>.",
+                    "Mayor que (<code>></code>).",
+                    "Número sin signos: 2000000."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Aún dentro de ese if, incrementamos nuestro contador global de empresas rentables.",
+                "question": "Usando el operador +=, suma 1 a la variable <code>cantidad_empresas</code>.",
+                "exact_answer": "cantidad_empresas += 1",
+                "explanation": "Escribimos <code>cantidad_empresas += 1</code>.",
+                "example": "<code>total += 1</code>",
+                "hints": [
+                    "Variable: <code>cantidad_empresas</code>.",
+                    "Operador <code>+=</code>.",
+                    "Suma el valor 1."
+                ]
+            }
+        ]
+    },
+    {
+        "id": 11,
+        "moduleNum": 6,
+        "moduleName": "Módulo 6: Bucles (WHILE)",
+        "levelName": "Nivel 1: Mientras que...",
+        "title": "1. El Bucle WHILE",
+        "theory": "El bucle <code>while</code> repite un bloque de código MIENTRAS una condición siga siendo verdadera.",
+        "theory_expanded": "A diferencia del <code>for</code>, que se usa cuando sabemos exactamente cuántos elementos hay en una lista, el <code>while</code> ('mientras' en inglés) se usa cuando NO sabemos cuántas veces tendremos que repetir algo. Por ejemplo, 'Mientras el usuario ingrese una contraseña incorrecta, vuelve a pedírsela'. Si la contraseña es correcta a la primera, el bucle no se repite. Si falla 10 veces, se repite 10 veces.<hr class='my-4 border-gray-200'><h3>Machete (Resumen):</h3><pre class='bg-gray-800 text-green-400 p-2 rounded mt-2 text-xs'># Bucle WHILE:\nwhile contador < 10:\n    contador += 1\n\n# Validar entrada (Invertir con NOT):\nwhile not (1 <= num <= 5):\n    num = int(input(\"Error:\"))</pre>",
+        "exercises": [
+            {
+                "type": "multiple_choice",
+                "context": "Queremos repetir una pregunta hasta que el usuario ingrese algo válido.",
+                "question": "¿Qué evalúa el bucle <code>while</code> antes de cada repetición?",
+                "options": [
+                    "Si ya pasaron 10 segundos.",
+                    "Si la condición a su lado sigue siendo True.",
+                    "Si ya recorrió toda la lista."
+                ],
+                "correct": 1,
+                "exact_answer": "Si la condición a su lado sigue siendo True.",
+                "explanation": "Cada vez que termina una vuelta, el bucle vuelve arriba y evalúa su condición. Si es True (Verdadera), vuelve a ejecutar el bloque. Si es False (Falsa), termina y continúa con el resto del programa.",
+                "example": "<code>while condicion == True:</code><br><span class='text-gray-500'># Se repite y repite</span>",
+                "hints": [
+                    "Piensa en un guardia de seguridad.",
+                    "Revisa tu identificación antes de dejarte pasar cada vez.",
+                    "Comprueba si la condición es Verdadera."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Iniciaste un bucle <code>while saldo < 0:</code> pero olvidaste hacer algo dentro del bloque para cambiar el saldo.",
+                "question": "¿Qué sucede si la condición de un bucle while nunca se vuelve False?",
+                "options": [
+                    "El bucle se repite indefinidamente (Bucle infinito).",
+                    "Python detiene el bucle automáticamente tras 100 intentos.",
+                    "Pasa al bloque else."
+                ],
+                "correct": 0,
+                "exact_answer": "El bucle se repite indefinidamente (Bucle infinito).",
+                "explanation": "Este es el error más común. Si no modificas la variable que controla el <code>while</code> dentro del bloque, la condición siempre será cierta, congelando tu programa en un bucle infinito.",
+                "example": "<code>x = 1<br>while x > 0:<br>    print(x)</code><br><span class='text-gray-500'># Imprime 1 para siempre</span>",
+                "hints": [
+                    "Python es obediente, no inteligente.",
+                    "Hará exactamente lo que le pidas por la eternidad.",
+                    "Se llama bucle infinito."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Necesitas que el ciclo ocurra si el número de leads mínimos ingresado es incorrecto (es 0 o menos).",
+                "question": "¿Cómo inicias el bucle para atrapar ese error?",
+                "options": [
+                    "while leads_minimos > 0:",
+                    "while leads_minimos <= 0:",
+                    "if leads_minimos <= 0:"
+                ],
+                "correct": 1,
+                "exact_answer": "while leads_minimos <= 0:",
+                "explanation": "Usamos <code>while leads_minimos <= 0:</code> para 'atrapar' al usuario. 'Mientras el valor sea inválido (0 o negativo), mantenlo atrapado aquí pidiendo que reingrese el dato'.",
+                "example": "<code>while error == True:</code><br><span class='text-gray-500'># Atrapado en el error</span>",
+                "hints": [
+                    "Queremos ejecutar el bucle cuando el dato es INCORRECTO.",
+                    "Incorrecto significa que es 0 o menos.",
+                    "Es menor o igual a cero."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "El usuario debe ingresar horas aceptables (entre 1 y 100). Queremos atraparlo si NO cumple esa regla.",
+                "question": "Completa usando el operador lógico 'not': <code>while {0} (1 <= horas <= 100):</code>",
+                "code": "<code>while {0} (1 <= horas <= 100):</code>",
+                "answers": [
+                    [
+                        "not"
+                    ]
+                ],
+                "exact_answer": "while not (1 <= horas <= 100):",
+                "explanation": "El operador <code>not</code> invierte la condición. Se lee: 'Mientras NO sea cierto que las horas están entre 1 y 100, repite el bucle'.",
+                "example": "<code>while not (valido):</code>",
+                "hints": [
+                    "En inglés es 'NO'.",
+                    "Tiene 3 letras.",
+                    "Invierte el booleano."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Queremos pedir datos interactivos. Usamos la función <code>input()</code>.",
+                "question": "Completa para obtener un valor entero: <code>horas = {0}(input(\"Ingrese límite\"))</code>",
+                "code": "<code>horas = {0}(input(\"Ingrese límite\"))</code>",
+                "answers": [
+                    [
+                        "int"
+                    ]
+                ],
+                "exact_answer": "horas = int(input(\"Ingrese límite\"))",
+                "explanation": "La función <code>input()</code> devuelve texto (string). Debemos envolverla en <code>int()</code> para transformarlo a número entero y poder validarlo matemáticamente.",
+                "example": "<code>edad = int(input(\"?\"))</code>",
+                "hints": [
+                    "Abreviatura de integer.",
+                    "Son tres letras.",
+                    "Convierte texto a número entero."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "En otro escenario, validamos que la facturación mínima no sea mayor o igual a la máxima.",
+                "question": "Completa la condición: <code>while facturacion_minima {0} facturacion_maxima:</code>",
+                "code": "<code>while facturacion_minima {0} facturacion_maxima:</code>",
+                "answers": [
+                    [
+                        ">="
+                    ]
+                ],
+                "exact_answer": "while facturacion_minima >= facturacion_maxima:",
+                "explanation": "Esto se leería como un error lógico en la empresa: 'Mientras la facturación mínima sea mayor o igual a la máxima (lo cual es un error), no lo dejes continuar'.",
+                "example": "<code>while min >= max:</code>",
+                "hints": [
+                    "Es mayor o igual.",
+                    "El símbolo de mayor va antes.",
+                    "<code>>=</code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "El sistema exige que la rentabilidad mínima esté entre 0 y 100.",
+                "question": "Escribe la condición while para atrapar al usuario MIENTRAS rentabilidad_minima NO esté (<code>not</code>) entre 0 y 100.",
+                "exact_answer": "while not (0 <= rentabilidad_minima <= 100):",
+                "explanation": "Queda: <code>while not (0 <= rentabilidad_minima <= 100):</code>. Los paréntesis ayudan a evaluar primero el rango numérico y luego aplicar el <code>not</code>.",
+                "example": "<code>while not (0 <= x <= 10):</code>",
+                "hints": [
+                    "Empieza con <code>while not</code>.",
+                    "Abre paréntesis y pon <code>0 <= rentabilidad_minima <= 100</code>.",
+                    "Cierra paréntesis y pon dos puntos."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Dentro del bucle anterior, debemos volver a solicitarle el dato al usuario para evitar un bucle infinito.",
+                "question": "Escribe la línea para asignar a <code>rentabilidad_minima</code> el resultado de llamar a <code>float()</code> envolviendo un <code>input(\"Reingrese:\")</code>.",
+                "exact_answer": "rentabilidad_minima = float(input(\"Reingrese:\"))",
+                "explanation": "Usamos <code>float()</code> en lugar de <code>int()</code> porque la rentabilidad puede tener decimales. Queda: <code>rentabilidad_minima = float(input(\"Reingrese:\"))</code>.",
+                "example": "<code>valor = float(input(\"?\"))</code>",
+                "hints": [
+                    "Asignación a <code>rentabilidad_minima</code>.",
+                    "Llama a <code>float(input(\"Reingrese:\"))</code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Tienes una variable <code>contador = 0</code> y quieres ejecutar un bucle mientras sea menor a 5.",
+                "question": "Escribe la línea que inicia el bucle while evaluando esa condición.",
+                "exact_answer": "while contador < 5:",
+                "explanation": "La línea correcta es <code>while contador < 5:</code>. Luego dentro del bucle deberás incrementar tu contador para eventualmente salir.",
+                "example": "<code>while x < 10:</code>",
+                "hints": [
+                    "Usa <code>while</code>.",
+                    "Compara con menor que <code><</code>.",
+                    "Cierra con dos puntos."
+                ]
+            }
+        ]
+    },
+    {
+        "id": 12,
+        "moduleNum": 6,
+        "moduleName": "Módulo 6: Bucles (WHILE)",
+        "levelName": "Nivel 2: Integración Final",
+        "title": "2. Control de Flujo Integral",
+        "theory": "Los programas reales combinan diccionarios, bucles FOR, sentencias IF y validaciones WHILE.",
+        "theory_expanded": "Para armar el sistema de toma de decisiones empresariales de las libretas Jupyter, el flujo fue: 1) Atrapar errores del usuario con WHILE validando sus datos de entrada. 2) Recorrer los diccionarios de la base de datos usando un bucle FOR con .items(). 3) Evaluar cada elemento usando un IF para ver si cumple las reglas de rentabilidad. ¡Esa es la verdadera anatomía de un software!<hr class='my-4 border-gray-200'><h3>Machete (Resumen):</h3><pre class='bg-gray-800 text-green-400 p-2 rounded mt-2 text-xs'># Bucle WHILE:\nwhile contador < 10:\n    contador += 1\n\n# Validar entrada (Invertir con NOT):\nwhile not (1 <= num <= 5):\n    num = int(input(\"Error:\"))</pre>",
+        "exercises": [
+            {
+                "type": "multiple_choice",
+                "context": "Antes de procesar, debes pedir las horas máximas al usuario y validar que sean > 0.",
+                "question": "¿Qué debemos hacer primero en el código?",
+                "options": [
+                    "Hacer el for sobre la base de datos.",
+                    "Declarar la variable en -1 y hacer un while para forzar la entrada del dato.",
+                    "Imprimir el resultado vacío."
+                ],
+                "correct": 1,
+                "exact_answer": "Declarar la variable en -1 y hacer un while para forzar la entrada del dato.",
+                "explanation": "Para forzar que el bucle <code>while</code> se ejecute al menos la primera vez pidiendo el dato, a menudo inicializamos la variable con un valor inválido a propósito (como -1).",
+                "example": "<code>x = -1<br>while x < 0:</code>",
+                "hints": [
+                    "Necesitamos que el bucle se ejecute para pedir el dato.",
+                    "Si lo inicias en un valor válido, nunca entrará al while.",
+                    "Forzamos el error."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Una vez obtenido el dato de <code>horas_maximas</code>, recorremos las entregas.",
+                "question": "En el contexto empresarial de los notebooks, ¿por qué sumábamos 1 a una variable <code>demorados</code> dentro del <code>if</code>?",
+                "options": [
+                    "Para crear un bucle infinito.",
+                    "Para llevar el conteo estadístico de cuántas entregas fallaron.",
+                    "Para cambiar las horas de entrega de ese paquete."
+                ],
+                "correct": 1,
+                "exact_answer": "Para llevar el conteo estadístico de cuántas entregas fallaron.",
+                "explanation": "Al poner <code>demorados += 1</code> únicamente cuando la condición <code>if demora > horas_maximas:</code> era cierta, lográbamos contar exactamente el número de envíos problemáticos.",
+                "example": "<code>if malo:<br>    errores += 1</code>",
+                "hints": [
+                    "La variable no afecta los tiempos del paquete.",
+                    "Lleva una cuenta acumulativa.",
+                    "Fines estadísticos."
+                ]
+            },
+            {
+                "type": "multiple_choice",
+                "context": "Queríamos guardar el nombre de la sucursal con más ventas.",
+                "question": "¿Cómo logramos esto dentro del <code>for sucursal, datos in sucursales.items():</code>?",
+                "options": [
+                    "Comparando si <code>datos[\"ventas\"] > mayor_venta</code> y guardando el nombre en <code>mejor_sucursal</code>.",
+                    "Pidiendo al usuario que ingrese la mejor sucursal.",
+                    "Sumando todas las ventas."
+                ],
+                "correct": 0,
+                "exact_answer": "Comparando si datos[\"ventas\"] > mayor_venta y guardando el nombre en mejor_sucursal.",
+                "explanation": "Este es el algoritmo del máximo. Vamos comparando las ventas actuales con el máximo histórico, y si lo supera, actualizamos el récord y guardamos el nombre del ganador.",
+                "example": "<code>if v > max:<br>    max = v</code>",
+                "hints": [
+                    "Es una comparación interna del sistema.",
+                    "Revisas uno a uno.",
+                    "Si es más grande, se guarda el nuevo líder."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Vamos a forzar el ingreso de una rentabilidad usando la técnica del valor trampa.",
+                "question": "Completa para declarar la trampa: <code>rentabilidad_minima = {0}</code>",
+                "code": "<code>rentabilidad_minima = {0}</code>",
+                "answers": [
+                    [
+                        "-1.0",
+                        "-1"
+                    ]
+                ],
+                "exact_answer": "rentabilidad_minima = -1.0",
+                "explanation": "Asignar un número negativo garantiza que la evaluación posterior <code>not (0 <= rentabilidad <= 100)</code> sea Verdadera y fuerce al bucle a pedir el dato.",
+                "example": "<code>x = -1.0</code>",
+                "hints": [
+                    "Es un número negativo decimal.",
+                    "Es menos uno punto cero."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Hacemos un print final para mostrar estadísticas.",
+                "question": "Usa las cadenas formateadas (f-strings) completando con la letra correspondiente: <code>print({0}\"Total demoras: {demorados}\")</code>",
+                "code": "<code>print({0}\"Total demoras: {demorados}\")</code>",
+                "answers": [
+                    [
+                        "f",
+                        "F"
+                    ]
+                ],
+                "exact_answer": "print(f\"Total demoras: {demorados}\")",
+                "explanation": "La letra <code>f</code> antes de las comillas le dice a Python que dentro del texto hay variables escondidas entre llaves que debe reemplazar por sus valores reales.",
+                "example": "<code>print(f\"Hola {nombre}\")</code>",
+                "hints": [
+                    "Significa 'format'.",
+                    "Es una sola letra antes de la primera comilla.",
+                    "Es la letra f."
+                ]
+            },
+            {
+                "type": "fill_in",
+                "context": "Imprimimos la sucursal ganadora.",
+                "question": "Completa la condición para imprimir el ganador solo si se encontró alguno: <code>{0} mejor_sucursal_ventas:</code>",
+                "code": "<code>{0} mejor_sucursal_ventas:</code>",
+                "answers": [
+                    [
+                        "if"
+                    ]
+                ],
+                "exact_answer": "if mejor_sucursal_ventas:",
+                "explanation": "En Python, <code>if variable:</code> verifica si la variable tiene contenido (no está vacía ni es falsa).",
+                "example": "<code>if nombre:</code><br><code>    print(nombre)</code>",
+                "hints": [
+                    "Si la variable existe y no está vacía...",
+                    "Evalúa con un condicional.",
+                    "Es el <code>if</code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "El bucle while debe pedir el porcentaje y guardarlo como float.",
+                "question": "Escribe el código para pedir la rentabilidad: asigna a <code>rentabilidad</code> un <code>float(input(\"Rentabilidad:\"))</code>.",
+                "exact_answer": "rentabilidad = float(input(\"Rentabilidad:\"))",
+                "explanation": "Queda: <code>rentabilidad = float(input(\"Rentabilidad:\"))</code>.",
+                "example": "<code>r = float(input(\"?\"))</code>",
+                "hints": [
+                    "Empieza con la variable <code>rentabilidad</code>.",
+                    "Usa <code>float()</code>.",
+                    "Dentro va <code>input(\"Rentabilidad:\")</code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Tenemos el algoritmo del máximo.",
+                "question": "Escribe la condición IF para evaluar si <code>datos[\"ventas\"]</code> es estrictamente mayor que la variable <code>mayor_venta</code>.",
+                "exact_answer": "if datos[\"ventas\"] > mayor_venta:",
+                "explanation": "Se escribe: <code>if datos[\"ventas\"] > mayor_venta:</code>. Recuerda los dos puntos al final de la línea.",
+                "example": "<code>if valor > tope:</code>",
+                "hints": [
+                    "Empieza con <code>if</code>.",
+                    "Accede al diccionario con <code>datos[\"ventas\"]</code>.",
+                    "Usa mayor que <code>></code>."
+                ]
+            },
+            {
+                "type": "write_code",
+                "context": "Dentro de ese IF, actualizamos el récord del ganador.",
+                "question": "Escribe la asignación donde guardamos <code>datos[\"ventas\"]</code> dentro de la variable <code>mayor_venta</code>.",
+                "exact_answer": "mayor_venta = datos[\"ventas\"]",
+                "explanation": "Para actualizar el récord, simplemente guardamos el nuevo valor más alto en nuestra variable de control: <code>mayor_venta = datos[\"ventas\"]</code>.",
+                "example": "<code>tope = valor</code>",
+                "hints": [
+                    "La variable <code>mayor_venta</code> a la izquierda.",
+                    "Usa <code>=</code>.",
+                    "El valor es <code>datos[\"ventas\"]</code>."
+                ]
+            }
+        ]
+    }
+];
+
+        let currentLesson = null;
+        let currentExerciseIndex = 0;
+        let xp = 0;
+        let hintsShown = 0;
+
+        document.addEventListener('DOMContentLoaded', () => { renderNav(); });
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        
+        function renderNav() {
+            const nav = document.getElementById('lesson-nav');
+            nav.innerHTML = '';
+            
+            // Group by moduleName
+            const modules = {};
+            lessons.forEach(l => {
+                if(!modules[l.moduleName]) modules[l.moduleName] = [];
+                modules[l.moduleName].push(l);
+            });
+            
+            for(const [modName, modLessons] of Object.entries(modules)) {
+                // Module header
+                const modDiv = document.createElement('div');
+                modDiv.className = "font-bold text-gray-700 text-xs uppercase tracking-wider mt-4 mb-2 px-2";
+                modDiv.innerText = modName;
+                nav.appendChild(modDiv);
+                
+                // Levels
+                modLessons.forEach(lesson => {
+                    const btn = document.createElement('button');
+                    btn.className = `w-full text-left p-2 md:p-3 rounded-lg transition-colors flex items-center justify-between hover:bg-blue-50 text-[var(--foreground)] text-xs md:text-sm`;
+                    btn.onclick = () => {
+                        if(window.innerWidth < 768) toggleSidebar();
+                        startLesson(lesson.id);
+                    };
+                    btn.innerHTML = `<span class="truncate pr-2">${lesson.levelName || lesson.title}</span><i class="fa-solid fa-chevron-right text-gray-300 flex-shrink-0"></i>`;
+                    nav.appendChild(btn);
+                });
+            }
+        }
+
+
+        function showTransitionScreen(moduleName, levelName, callback) {
+            const screen = document.getElementById('transition-screen');
+            document.getElementById('transition-module').innerText = moduleName;
+            document.getElementById('transition-level').innerText = levelName;
+            screen.classList.remove('hidden', 'fade-out');
+            setTimeout(() => {
+                screen.classList.add('fade-out');
+                setTimeout(() => {
+                    screen.classList.add('hidden');
+                    if (callback) callback();
+                }, 1000);
+            }, 1500);
+        }
+
+        function startLesson(id, skipTransition = false) {
+            currentLesson = lessons.find(l => l.id === id);
+            currentExerciseIndex = 0;
+            if (!skipTransition && currentLesson) {
+                document.getElementById('welcome-screen').classList.add('hidden');
+                document.getElementById('completion-screen').classList.add('hidden');
+                document.getElementById('lesson-screen').classList.add('hidden');
+                showTransitionScreen(currentLesson.moduleName, currentLesson.levelName, () => renderLessonUI());
+            } else {
+                renderLessonUI();
+            }
+        }
+
+        function toggleTheory() {
+            const content = document.getElementById('theory-expanded-content');
+            const icon = document.getElementById('theory-icon');
+            if(content.classList.contains('open')) {
+                content.classList.remove('open');
+                icon.className = 'fa-solid fa-chevron-down';
+            } else {
+                content.classList.add('open');
+                icon.className = 'fa-solid fa-chevron-up';
+                setTimeout(() => el.scrollIntoView({behavior: 'smooth', block: 'center'}), 150);
+            }
+        }
+
+        function renderLessonUI() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('completion-screen').classList.add('hidden');
+            document.getElementById('lesson-screen').classList.remove('hidden');
+            document.getElementById('btn-home').classList.remove('hidden');
+            
+            document.getElementById('current-lesson-title').innerText = currentLesson.title;
+            document.getElementById('lesson-theory').innerHTML = currentLesson.theory;
+            
+            if (currentLesson.theory_expanded) {
+                document.getElementById('btn-expand-theory').classList.remove('hidden');
+                document.getElementById('theory-expanded-content').innerHTML = currentLesson.theory_expanded;
+                document.getElementById('theory-expanded-content').classList.remove('open');
+                document.getElementById('theory-icon').className = 'fa-solid fa-chevron-down';
+            } else {
+                document.getElementById('btn-expand-theory').classList.add('hidden');
+                document.getElementById('theory-expanded-content').innerHTML = "";
+            }
+
+            loadExercise();
+        }
+
+        function goHome() {
+            document.getElementById('lesson-screen').classList.add('hidden');
+            document.getElementById('completion-screen').classList.add('hidden');
+            document.getElementById('welcome-screen').classList.remove('hidden');
+            document.getElementById('current-lesson-title').innerText = "Selecciona una lección";
+            document.getElementById('btn-home').classList.add('hidden');
+        }
+
+        function loadExercise() {
+            hintsShown = 0;
+            const ex = currentLesson.exercises[currentExerciseIndex];
+            document.getElementById('exercise-number').innerText = (currentExerciseIndex + 1);
+            document.getElementById('progress-text').innerText = `${currentExerciseIndex + 1} / ${currentLesson.exercises.length}`;
+            
+            const contextBox = document.getElementById('exercise-context');
+            if (ex.context) {
+                contextBox.innerHTML = `<b>Contexto:</b> ${ex.context}`;
+                contextBox.classList.remove('hidden');
+            } else {
+                contextBox.classList.add('hidden');
+            }
+            
+            document.getElementById('exercise-question').innerHTML = ex.question.replace(/\{\d+\}/g, '<span class="bg-gray-200 text-gray-200 px-3 py-0.5 rounded mx-1 inline-block text-xs select-none shadow-inner">_</span>');
+            const container = document.getElementById('exercise-container');
+            container.innerHTML = '';
+            
+            document.getElementById('feedback-box').classList.add('hidden');
+            document.getElementById('example-container').classList.add('hidden');
+            document.getElementById('demo-example').classList.remove('open');
+            document.getElementById('example-icon').className = 'fa-solid fa-chevron-down';
+            document.getElementById('btn-continue').classList.add('hidden');
+            document.getElementById('btn-check').classList.remove('hidden');
+            document.getElementById('btn-check').disabled = false;
+            
+            // Hint system setup
+            if (ex.hints && ex.hints.length > 0) {
+                document.getElementById('hint-container').classList.remove('hidden');
+                document.getElementById('hint-list').innerHTML = '';
+                document.getElementById('btn-next-hint').classList.remove('hidden');
+                document.getElementById('hint-counter').innerText = `0/${ex.hints.length}`;
+            } else {
+                document.getElementById('hint-container').classList.add('hidden');
+            }
+            
+            if (ex.type === 'multiple_choice') {
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-1 gap-2';
+                ex.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = `p-3 border-2 border-[var(--border)] rounded-xl text-left font-medium text-sm transition-colors hover:bg-blue-50`;
+                    btn.onclick = () => selectOption(idx, btn);
+                    btn.innerHTML = `<span class="inline-block w-6 font-bold text-gray-400">${idx+1}.</span> <span>${opt}</span>`;
+                    grid.appendChild(btn);
+                });
+                container.appendChild(grid);
+            } 
+            else if (ex.type === 'fill_in') {
+                const codeBlock = document.createElement('div');
+                codeBlock.className = 'bg-gray-50 p-4 rounded-xl font-mono text-sm border border-[var(--border)] overflow-x-auto whitespace-nowrap';
+                let htmlCode = ex.code;
+                ex.answers.forEach((_, idx) => {
+                    htmlCode = htmlCode.replace(`{${idx}}`, `<input type="text" id="blank-${idx}" class="blank-input focus:border-blue-500" autocomplete="off" autocorrect="off" autocapitalize="none" onkeypress="if(event.key === 'Enter') checkAnswer()" onfocus="setTimeout(() => this.scrollIntoView({behavior: 'smooth', block: 'center'}), 300)">`);
+                });
+                codeBlock.innerHTML = htmlCode;
+                container.appendChild(codeBlock);
+            }
+            else if (ex.type === 'write_code') {
+                const codeBlock = document.createElement('div');
+                codeBlock.className = 'bg-gray-50 px-3 py-2 rounded-xl font-mono text-xs md:text-sm border border-[var(--border)] flex items-center gap-2 relative';
+                
+                const prefix = document.createElement('span');
+                prefix.className = 'text-blue-500 font-bold select-none';
+                prefix.innerText = '>>>';
+
+                const inputEl = document.createElement('input');
+                inputEl.type = 'text';
+                inputEl.id = 'code-input';
+                inputEl.className = 'flex-1 bg-transparent py-1 border-b-2 border-gray-300 focus:border-blue-500 outline-none text-[var(--foreground)]';
+                inputEl.autocomplete = 'off';
+                inputEl.setAttribute('autocorrect', 'off');
+                inputEl.setAttribute('autocapitalize', 'none');
+                inputEl.spellcheck = false;
+                inputEl.placeholder = "Escribe y presiona Enter/Intro...";
+                
+                inputEl.onfocus = function() { setTimeout(() => this.scrollIntoView({behavior: 'smooth', block: 'center'}), 300); };
+                inputEl.onkeypress = function(e) {
+                    if (e.key === 'Enter') checkAnswer();
+                };
+
+                codeBlock.appendChild(prefix);
+                codeBlock.appendChild(inputEl);
+                container.appendChild(codeBlock);
+            }
+            
+            setTimeout(() => {
+                const firstInput = container.querySelector('input');
+                if (firstInput) firstInput.focus();
+            }, 100);
+        }
+
+        let selectedOptionIdx = -1;
+        function selectOption(idx, btnElement) {
+            selectedOptionIdx = idx;
+            const btns = btnElement.parentElement.children;
+            for(let b of btns) {
+                b.classList.remove('border-blue-500', 'bg-blue-50');
+                b.classList.add('border-[var(--border)]');
+            }
+            btnElement.classList.remove('border-[var(--border)]');
+            btnElement.classList.add('border-blue-500', 'bg-blue-50');
+        }
+
+        function showNextHint() {
+            const ex = currentLesson.exercises[currentExerciseIndex];
+            if (hintsShown < ex.hints.length) {
+                const ul = document.getElementById('hint-list');
+                const li = document.createElement('li');
+                li.innerHTML = `<b>Pista ${hintsShown+1}:</b> ${ex.hints[hintsShown]}`;
+                ul.appendChild(li);
+                hintsShown++;
+                document.getElementById('hint-counter').innerText = `${hintsShown}/${ex.hints.length}`;
+                if (hintsShown >= ex.hints.length) document.getElementById('btn-next-hint').classList.add('hidden');
+                setTimeout(() => document.getElementById('btn-check').scrollIntoView({behavior: 'smooth', block: 'center'}), 150);
+            }
+        }
+        
+        function skipExercise() {
+            const ex = currentLesson.exercises[currentExerciseIndex];
+            let exactAnswer = ex.exact_answer || "Revisa la explicación para ver la respuesta correcta.";
+            showFeedback(false, `<b>Respuesta esperada:</b> <code class="bg-red-200 text-red-900 px-1 rounded">${exactAnswer}</code><br><br>${ex.explanation}`);
+            document.getElementById('feedback-title').innerText = "Respuesta Revelada";
+            document.getElementById('btn-check').classList.add('hidden');
+            document.getElementById('btn-continue').classList.remove('hidden');
+                setTimeout(() => document.getElementById('btn-continue').scrollIntoView({behavior: 'smooth', block: 'end'}), 150);
+            if (ex.example) {
+                document.getElementById('example-container').classList.remove('hidden');
+                document.getElementById('demo-example').innerHTML = ex.example;
+            }
+        }
+
+        function checkAnswer() {
+            const ex = currentLesson.exercises[currentExerciseIndex];
+            let isCorrect = false;
+
+            if (ex.type === 'multiple_choice') {
+                if (selectedOptionIdx === -1) return alert("Selecciona una opción");
+                isCorrect = (selectedOptionIdx === ex.correct);
+            } 
+            else if (ex.type === 'fill_in') {
+                isCorrect = true;
+                for (let i = 0; i < ex.answers.length; i++) {
+                    const el = document.getElementById(`blank-${i}`);
+                    if(!el) continue;
+                    let userVal = el.value.trim().replace(/"/g, "'"); // normalize quotes
+                    let matched = false;
+                    for(let ans of ex.answers[i]) {
+                        if(ans.replace(/"/g, "'") === userVal) { matched = true; break; }
+                    }
+                    if(!matched) {
+                        isCorrect = false;
+                        break;
+                    }
+                }
+            }
+            else if (ex.type === 'write_code') {
+                const val = document.getElementById('code-input').value.trim();
+                isCorrect = false;
+                
+                // Primary validation: space-insensitive exact match
+                if (ex.exact_answer) {
+                    let val_norm = val.replace(/\s+/g, '').replace(/'/g, '"');
+                    let exp_norm = ex.exact_answer.replace(/\s+/g, '').replace(/'/g, '"');
+                    if (val_norm === exp_norm) {
+                        isCorrect = true;
+                    }
+                }
+                
+                // Fallback: regex
+                if (!isCorrect && ex.correct_regex) {
+                    for (let pattern of ex.correct_regex) {
+                        if (new RegExp(pattern).test(val)) {
+                            isCorrect = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (isCorrect) {
+                showFeedback(true, ex.explanation);
+                document.getElementById('btn-check').classList.add('hidden');
+                document.getElementById('btn-continue').classList.remove('hidden');
+                setTimeout(() => document.getElementById('btn-continue').scrollIntoView({behavior: 'smooth', block: 'end'}), 150);
+                if (ex.example) {
+                    document.getElementById('example-container').classList.remove('hidden');
+                    document.getElementById('demo-example').innerHTML = ex.example;
+                }
+                updateXP(10);
+            } else {
+                let exactAnswer = ex.exact_answer || "Revisa tus comillas, espacios o signos igual.";
+                showFeedback(false, `<b>Error:</b> ${ex.explanation}<br><br><i>Para avanzar, la respuesta exacta requerida es:</i> <br><code class="bg-red-200 text-red-900 px-2 py-1 rounded mt-2 inline-block font-mono font-bold">${exactAnswer}</code>`);
+            }
+        }
+
+        function toggleExample() {
+            const el = document.getElementById('demo-example');
+            const icon = document.getElementById('example-icon');
+            if (el.classList.contains('open')) {
+                el.classList.remove('open');
+                icon.className = 'fa-solid fa-chevron-down';
+            } else {
+                el.classList.add('open');
+                icon.className = 'fa-solid fa-chevron-up';
+                setTimeout(() => el.scrollIntoView({behavior: 'smooth', block: 'center'}), 150);
+            }
+        }
+
+        function showFeedback(isCorrect, text) {
+            const box = document.getElementById('feedback-box');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            
+            box.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-900', 'border-red-300');
+            if (isCorrect) {
+                box.classList.add('bg-green-100', 'text-green-800');
+                icon.className = 'fa-solid fa-circle-check mt-0.5 text-xl';
+                title.innerText = '¡Correcto!';
+            } else {
+                box.classList.add('bg-red-100', 'text-red-900', 'border', 'border-red-300');
+                icon.className = 'fa-solid fa-circle-xmark mt-0.5 text-xl';
+                title.innerText = 'Incorrecto. Mira el análisis detallado:';
+            }
+            document.getElementById('feedback-text').innerHTML = text;
+        }
+
+        
+        function prevExercise() {
+            if(currentExerciseIndex > 0) {
+                currentExerciseIndex--;
+                selectedOptionIdx = -1;
+                loadExercise();
+            }
+        }
+        
+        function nextExercise() {
+            currentExerciseIndex++;
+            selectedOptionIdx = -1;
+            if (currentExerciseIndex < currentLesson.exercises.length) {
+                loadExercise();
+            } else {
+                finishLesson();
+            }
+        }
+
+        function finishLesson() {
+            document.getElementById('lesson-screen').classList.add('hidden');
+            document.getElementById('completion-screen').classList.remove('hidden');
+            
+            const currentIndex = lessons.findIndex(l => l.id === currentLesson.id);
+            const btnNext = document.getElementById('btn-next-lesson');
+            
+            if (currentIndex >= 0 && currentIndex < lessons.length - 1) {
+                const nextLesson = lessons[currentIndex + 1];
+                document.getElementById('next-lesson-text').innerText = 
+                    (nextLesson.moduleNum === currentLesson.moduleNum) ? "Avanzar al Nivel 2" : "Avanzar al Siguiente Módulo";
+                btnNext.onclick = () => startLesson(nextLesson.id);
+                btnNext.classList.remove('hidden');
+            } else {
+                btnNext.classList.add('hidden');
+            }
+        }
+
+        function updateXP(points) {
+            xp += points;
+            document.getElementById('xp-counter-mobile').innerHTML = xp;
+            document.getElementById('xp-counter-desktop').innerHTML = `<i class="fa-solid fa-star"></i> ${xp} XP`;
+        }
+    </script>
+</body>
+</html>
