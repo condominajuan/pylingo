@@ -89,29 +89,29 @@
         </div>
     </header>
 
-    <aside id="sidebar" class="fixed md:static inset-y-0 left-0 w-80 md:w-72 bg-[var(--card)] border-r border-[var(--border)] flex flex-col h-full shadow-2xl md:shadow-lg z-30 transform -translate-x-full md:translate-x-0">
-        <div class="p-4 flex justify-between items-center md:hidden border-b border-[var(--border)]">
-            <span class="font-bold text-lg text-[var(--foreground)]">Menú de Lecciones</span>
-            <button onclick="toggleSidebar()" class="text-2xl text-[var(--muted-foreground)] p-2">
+    <aside id="sidebar" class="fixed md:static inset-y-0 left-0 w-[85vw] md:w-80 bg-indigo-950/85 backdrop-blur-md border-r border-indigo-800 flex flex-col h-full shadow-2xl md:shadow-lg z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+        <div class="p-5 flex justify-between items-center md:hidden border-b border-indigo-800">
+            <span class="font-bold text-xl text-white tracking-wide">Módulos</span>
+            <button onclick="toggleSidebar()" class="text-3xl text-indigo-300 hover:text-white p-2 transition-colors">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
-        <div class="p-4 border-b border-[var(--border)] hidden md:block">
-            <h1 class="text-xl font-bold text-blue-500 flex items-center gap-2">
+        <div class="p-5 border-b border-indigo-800 hidden md:block">
+            <h1 class="text-2xl font-bold text-indigo-400 flex items-center gap-2">
                 <i class="fa-brands fa-python"></i> PyLingo
             </h1>
-            <p class="text-[var(--muted-foreground)] text-xs mt-1">Módulo 2: Fundamentos</p>
+            <p class="text-indigo-200 text-xs mt-2 tracking-wider uppercase font-semibold">Ruta de Aprendizaje</p>
         </div>
-        <div class="p-3 border-b border-[var(--border)] hidden md:flex justify-between items-center bg-blue-50/10">
+        <div class="p-3 border-b border-indigo-800 hidden md:flex justify-between items-center bg-indigo-900/50 text-indigo-100">
             <span class="font-semibold text-sm">Experiencia:</span>
-            <span id="xp-counter-desktop" class="text-amber-500 font-bold flex items-center gap-1 text-sm">
+            <span id="xp-counter-desktop" class="text-amber-400 font-bold flex items-center gap-1 text-sm">
                 <i class="fa-solid fa-star"></i> 0 XP
             </span>
         </div>
-        <nav class="flex-1 overflow-y-auto p-3 space-y-1" id="lesson-nav"></nav>
+        <nav class="flex-1 overflow-y-auto py-2" id="lesson-nav"></nav>
     </aside>
 
-    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden transition-opacity"></div>
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity"></div>
 
     <main class="flex-1 flex flex-col h-full relative bg-[var(--background)] overflow-hidden w-full">
         
@@ -122,7 +122,7 @@
             </button>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-3 md:p-6 relative flex flex-col" id="main-content">
+        <div class="flex-1 overflow-y-auto p-3 md:p-6 pb-20 md:pb-6 relative flex flex-col" id="main-content">
             
             <div id="welcome-screen" class="max-w-2xl mx-auto text-center mt-10 px-4">
                 <i class="fa-brands fa-python text-5xl text-blue-500 mb-4"></i>
@@ -152,7 +152,7 @@
                     <div id="theory-expanded-content" class="theory-expansion mt-2 bg-blue-50 p-3 rounded-lg text-xs md:text-sm text-[var(--foreground)] border border-blue-100 leading-relaxed"></div>
                 </div>
 
-                <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 shadow-sm relative flex-1 flex flex-col">
+                <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 pb-6 md:pb-4 shadow-sm relative flex-1 flex flex-col mb-4 md:mb-0">
                     <div class="flex justify-between items-center mb-3 border-b border-[var(--border)] pb-2">
                         <div class="flex items-center gap-2 md:gap-4">
                             <h3 class="text-sm md:text-base font-bold flex items-center gap-1 md:gap-2">
@@ -168,7 +168,7 @@
                         </div>
                     </div>
                     
-                    <div id="exercise-context" class="text-xs md:text-sm mb-3 text-[var(--muted-foreground)] border-l-2 border-blue-500 pl-2 bg-blue-50 py-1"></div>
+                    <div id="exercise-context" class="text-sm md:text-base mb-4 text-indigo-900 border-l-4 border-indigo-500 pl-3 pr-2 bg-indigo-50 py-3 font-semibold shadow-sm rounded-r-lg"></div>
                     <div id="exercise-question" class="text-sm md:text-base mb-4 font-medium leading-relaxed"></div>
                     
                     <div id="exercise-container" class="mb-4"></div>
@@ -212,7 +212,7 @@
                     </div>
 
                     <!-- BUTTONS -->
-                    <div class="flex flex-col md:flex-row gap-2">
+                    <div class="flex flex-col md:flex-row gap-2 mt-4 mb-4 md:mb-0">
                         <button id="btn-check" onclick="checkAnswer()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-sm transition-colors">
                             Comprobar Respuesta
                         </button>
@@ -2389,105 +2389,65 @@
             const nav = document.getElementById('lesson-nav');
             nav.innerHTML = '';
             
-            // Group by moduleName
             const modules = {};
             lessons.forEach(l => {
                 if(!modules[l.moduleName]) modules[l.moduleName] = [];
                 modules[l.moduleName].push(l);
             });
             
-            for(const [modName, modLessons] of Object.entries(modules)) {
-                // Module header
-                const modDiv = document.createElement('div');
-                modDiv.className = "font-bold text-gray-700 text-xs uppercase tracking-wider mt-4 mb-2 px-2";
-                modDiv.innerText = modName;
-                nav.appendChild(modDiv);
+            const modEntries = Object.entries(modules);
+            modEntries.forEach(([modName, modLessons], index) => {
+                const modWrapper = document.createElement('div');
+                modWrapper.className = "mb-0"; // No extra margin, sober boxes
                 
-                // Levels
+                const header = document.createElement('button');
+                header.className = "w-full text-left px-5 py-4 flex items-center justify-between text-white font-semibold transition-colors focus:outline-none hover:bg-indigo-800/40";
+                
+                // Keep the active module expanded by default
+                let isActiveModule = modLessons.some(l => l.id === currentLesson?.id);
+                
+                header.innerHTML = `<span class="tracking-wide">${modName}</span> <i class="fa-solid fa-chevron-down text-sm text-indigo-400 transition-transform duration-300 ${isActiveModule ? 'rotate-180' : ''}"></i>`;
+                
+                const levelsContainer = document.createElement('div');
+                levelsContainer.className = "overflow-hidden transition-all duration-300 ease-in-out bg-indigo-950/60";
+                levelsContainer.style.maxHeight = isActiveModule ? '1000px' : '0px';
+                
+                header.onclick = () => {
+                    const icon = header.querySelector('i');
+                    if (levelsContainer.style.maxHeight !== '0px') {
+                        levelsContainer.style.maxHeight = '0px';
+                        icon.classList.remove('rotate-180');
+                    } else {
+                        levelsContainer.style.maxHeight = '1000px';
+                        icon.classList.add('rotate-180');
+                    }
+                };
+                
                 modLessons.forEach(lesson => {
                     const btn = document.createElement('button');
-                    btn.className = `w-full text-left p-2 md:p-3 rounded-lg transition-colors flex items-center justify-between hover:bg-blue-50 text-[var(--foreground)] text-xs md:text-sm`;
+                    const isActive = lesson.id === currentLesson?.id;
+                    btn.className = `w-full text-left pl-8 pr-5 py-3 flex items-center justify-between text-sm transition-colors border-l-2 ${isActive ? 'border-indigo-400 text-indigo-100 font-bold bg-indigo-800/40' : 'border-transparent text-indigo-300 hover:text-white hover:bg-indigo-800/20 hover:border-indigo-600'}`;
                     btn.onclick = () => {
                         if(window.innerWidth < 768) toggleSidebar();
                         startLesson(lesson.id);
                     };
-                    btn.innerHTML = `<span class="truncate pr-2">${lesson.levelName || lesson.title}</span><i class="fa-solid fa-chevron-right text-gray-300 flex-shrink-0"></i>`;
-                    nav.appendChild(btn);
+                    btn.innerHTML = `<span class="truncate">${lesson.levelName || lesson.title}</span>`;
+                    levelsContainer.appendChild(btn);
                 });
-            }
+                
+                modWrapper.appendChild(header);
+                modWrapper.appendChild(levelsContainer);
+                nav.appendChild(modWrapper);
+                
+                // Thin line divider taking 90%
+                if (index < modEntries.length - 1) {
+                    const divider = document.createElement('div');
+                    divider.className = "w-[90%] mx-auto border-b border-indigo-800/60 my-1";
+                    nav.appendChild(divider);
+                }
+            });
         }
-
-
-        function showTransitionScreen(moduleName, levelName, callback) {
-            const screen = document.getElementById('transition-screen');
-            document.getElementById('transition-module').innerText = moduleName;
-            document.getElementById('transition-level').innerText = levelName;
-            screen.classList.remove('hidden', 'fade-out');
-            setTimeout(() => {
-                screen.classList.add('fade-out');
-                setTimeout(() => {
-                    screen.classList.add('hidden');
-                    if (callback) callback();
-                }, 1000);
-            }, 1500);
-        }
-
-        function startLesson(id, skipTransition = false) {
-            currentLesson = lessons.find(l => l.id === id);
-            currentExerciseIndex = 0;
-            if (!skipTransition && currentLesson) {
-                document.getElementById('welcome-screen').classList.add('hidden');
-                document.getElementById('completion-screen').classList.add('hidden');
-                document.getElementById('lesson-screen').classList.add('hidden');
-                showTransitionScreen(currentLesson.moduleName, currentLesson.levelName, () => renderLessonUI());
-            } else {
-                renderLessonUI();
-            }
-        }
-
-        function toggleTheory() {
-            const content = document.getElementById('theory-expanded-content');
-            const icon = document.getElementById('theory-icon');
-            if(content.classList.contains('open')) {
-                content.classList.remove('open');
-                icon.className = 'fa-solid fa-chevron-down';
-            } else {
-                content.classList.add('open');
-                icon.className = 'fa-solid fa-chevron-up';
-                setTimeout(() => el.scrollIntoView({behavior: 'smooth', block: 'center'}), 150);
-            }
-        }
-
-        function renderLessonUI() {
-            document.getElementById('welcome-screen').classList.add('hidden');
-            document.getElementById('completion-screen').classList.add('hidden');
-            document.getElementById('lesson-screen').classList.remove('hidden');
-            document.getElementById('btn-home').classList.remove('hidden');
-            
-            document.getElementById('current-lesson-title').innerText = currentLesson.title;
-            document.getElementById('lesson-theory').innerHTML = currentLesson.theory;
-            
-            if (currentLesson.theory_expanded) {
-                document.getElementById('btn-expand-theory').classList.remove('hidden');
-                document.getElementById('theory-expanded-content').innerHTML = currentLesson.theory_expanded;
-                document.getElementById('theory-expanded-content').classList.remove('open');
-                document.getElementById('theory-icon').className = 'fa-solid fa-chevron-down';
-            } else {
-                document.getElementById('btn-expand-theory').classList.add('hidden');
-                document.getElementById('theory-expanded-content').innerHTML = "";
-            }
-
-            loadExercise();
-        }
-
-        function goHome() {
-            document.getElementById('lesson-screen').classList.add('hidden');
-            document.getElementById('completion-screen').classList.add('hidden');
-            document.getElementById('welcome-screen').classList.remove('hidden');
-            document.getElementById('current-lesson-title').innerText = "Selecciona una lección";
-            document.getElementById('btn-home').classList.add('hidden');
-        }
-
+        
         function loadExercise() {
             hintsShown = 0;
             const ex = currentLesson.exercises[currentExerciseIndex];
@@ -2602,7 +2562,7 @@
                 hintsShown++;
                 document.getElementById('hint-counter').innerText = `${hintsShown}/${ex.hints.length}`;
                 if (hintsShown >= ex.hints.length) document.getElementById('btn-next-hint').classList.add('hidden');
-                setTimeout(() => document.getElementById('btn-check').scrollIntoView({behavior: 'smooth', block: 'center'}), 150);
+                setTimeout(() => document.getElementById('btn-check').scrollIntoView({behavior: 'smooth', block: 'center'}), 350);
             }
         }
         
@@ -2613,7 +2573,7 @@
             document.getElementById('feedback-title').innerText = "Respuesta Revelada";
             document.getElementById('btn-check').classList.add('hidden');
             document.getElementById('btn-continue').classList.remove('hidden');
-                setTimeout(() => document.getElementById('btn-continue').scrollIntoView({behavior: 'smooth', block: 'end'}), 150);
+                setTimeout(() => document.getElementById('btn-continue').scrollIntoView({behavior: 'smooth', block: 'end'}), 350);
             if (ex.example) {
                 document.getElementById('example-container').classList.remove('hidden');
                 document.getElementById('demo-example').innerHTML = ex.example;
@@ -2621,6 +2581,7 @@
         }
 
         function checkAnswer() {
+            if (document.activeElement && document.activeElement.tagName === 'INPUT') document.activeElement.blur();
             const ex = currentLesson.exercises[currentExerciseIndex];
             let isCorrect = false;
 
@@ -2672,7 +2633,7 @@
                 showFeedback(true, ex.explanation);
                 document.getElementById('btn-check').classList.add('hidden');
                 document.getElementById('btn-continue').classList.remove('hidden');
-                setTimeout(() => document.getElementById('btn-continue').scrollIntoView({behavior: 'smooth', block: 'end'}), 150);
+                setTimeout(() => document.getElementById('btn-continue').scrollIntoView({behavior: 'smooth', block: 'end'}), 350);
                 if (ex.example) {
                     document.getElementById('example-container').classList.remove('hidden');
                     document.getElementById('demo-example').innerHTML = ex.example;
@@ -2681,6 +2642,7 @@
             } else {
                 let exactAnswer = ex.exact_answer || "Revisa tus comillas, espacios o signos igual.";
                 showFeedback(false, `<b>Error:</b> ${ex.explanation}<br><br><i>Para avanzar, la respuesta exacta requerida es:</i> <br><code class="bg-red-200 text-red-900 px-2 py-1 rounded mt-2 inline-block font-mono font-bold">${exactAnswer}</code>`);
+                setTimeout(() => document.getElementById('btn-check').scrollIntoView({behavior: 'smooth', block: 'end'}), 350);
             }
         }
 
@@ -2693,7 +2655,7 @@
             } else {
                 el.classList.add('open');
                 icon.className = 'fa-solid fa-chevron-up';
-                setTimeout(() => el.scrollIntoView({behavior: 'smooth', block: 'center'}), 150);
+                setTimeout(() => el.scrollIntoView({behavior: 'smooth', block: 'center'}), 350);
             }
         }
 
