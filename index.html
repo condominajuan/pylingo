@@ -2448,6 +2448,75 @@
             });
         }
         
+        
+
+        function startLesson(id) {
+            const lesson = lessons.find(l => l.id === id);
+            if (!lesson) return;
+            currentLesson = lesson;
+            currentExerciseIndex = 0;
+            
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('completion-screen').classList.add('hidden');
+            document.getElementById('lesson-screen').classList.remove('hidden');
+            
+            document.getElementById('transition-screen').classList.remove('hidden');
+            document.getElementById('transition-screen').classList.remove('fade-out');
+            document.getElementById('transition-module').innerText = lesson.moduleName || "";
+            document.getElementById('transition-level').innerText = lesson.levelName || lesson.title || "";
+            
+            setTimeout(() => {
+                document.getElementById('transition-screen').classList.add('fade-out');
+                setTimeout(() => {
+                    document.getElementById('transition-screen').classList.add('hidden');
+                    document.getElementById('transition-screen').classList.remove('fade-out');
+                }, 1000);
+            }, 1000);
+
+            document.getElementById('current-lesson-title').innerText = `${lesson.moduleName}: ${lesson.levelName || lesson.title}`;
+            document.getElementById('btn-home').classList.remove('hidden');
+            
+            if (lesson.theory) {
+                document.getElementById('lesson-theory').innerHTML = lesson.theory;
+                const theoryExpanded = document.getElementById('theory-expanded-content');
+                const btnExpand = document.getElementById('btn-expand-theory');
+                if (lesson.theory_expanded) {
+                    theoryExpanded.innerHTML = lesson.theory_expanded;
+                    btnExpand.classList.remove('hidden');
+                    theoryExpanded.classList.remove('open');
+                    document.getElementById('theory-icon').className = 'fa-solid fa-chevron-down';
+                } else {
+                    theoryExpanded.innerHTML = '';
+                    btnExpand.classList.add('hidden');
+                }
+            }
+            
+            renderNav();
+            loadExercise();
+        }
+
+        function toggleTheory() {
+            const el = document.getElementById('theory-expanded-content');
+            const icon = document.getElementById('theory-icon');
+            if (el.classList.contains('open')) {
+                el.classList.remove('open');
+                icon.className = 'fa-solid fa-chevron-down';
+            } else {
+                el.classList.add('open');
+                icon.className = 'fa-solid fa-chevron-up';
+            }
+        }
+
+        function goHome() {
+            document.getElementById('lesson-screen').classList.add('hidden');
+            document.getElementById('completion-screen').classList.add('hidden');
+            document.getElementById('welcome-screen').classList.remove('hidden');
+            document.getElementById('current-lesson-title').innerText = "Selecciona una lección";
+            document.getElementById('btn-home').classList.add('hidden');
+            currentLesson = null;
+            renderNav();
+        }
+
         function loadExercise() {
             hintsShown = 0;
             const ex = currentLesson.exercises[currentExerciseIndex];
