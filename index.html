@@ -1347,7 +1347,7 @@
                 "context": "Tienes el diccionario <code>alumno</code> y quieres actualizar su calificación.",
                 "question": "Escribe el código para asignarle a la clave <code>\"nota\"</code> el valor de 10 dentro del diccionario <code>alumno</code>.",
                 "exact_answer": "alumno[\"nota\"] = 10",
-                "explanation": "Llamas al diccionario, le pasas la clave entre corchetes, y le asignas el valor. Queda: <code>alumno[\"nota\"] = 10</code>.",
+                "explanation": "Para modificar un dato NO creamos un diccionario nuevo con <code>alumno = {...}</code> porque eso borraría todos los demás datos que ya tenía guardado el alumno. En su lugar, accedemos a la clave mediante corchetes. Queda: <code>alumno[\"nota\"] = 10</code>.",
                 "example": "<code>user[\"edad\"] = 30</code><br><span class='text-gray-500'># Cambia o crea edad</span>",
                 "hints": [
                     "Empieza llamando a <code>alumno</code>.",
